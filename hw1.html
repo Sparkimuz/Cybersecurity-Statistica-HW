@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HW1 - Elliptic Curve Cryptography</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-hover);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--text-main);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        input {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 80px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:disabled {
+            background-color: var(--border);
+            cursor: not-allowed;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            background: var(--text-main);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .terminal {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 1.5rem;
+            border-radius: 8px;
+            height: 380px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .terminal p { margin: 0.2rem 0; }
+        .term-highlight { color: var(--warning); }
+        .term-success { color: var(--success); font-weight: bold; }
+
+        .report-section {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px left solid var(--accent);
+            border-left: 4px solid var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Homework 1: Public-Key Cryptography</h1>
+            <p style="margin:0; color: var(--text-muted);">Elliptic-curve scalar multiplication (Toy Curve)</p>
+        </div>
+        <a href="index.html" class="back-link">
+            ← Torna alla Home
+        </a>
+    </header>
+
+    <div class="container">
+        
+        <!-- Controls and Info -->
+        <div class="panel full-width">
+            <h2>Algorithm Setup</h2>
+            <p><strong>Curve:</strong> y² = x³ + 7 (mod 17) &nbsp;|&nbsp; <strong>Base Point (G):</strong> (1, 5)</p>
+            <div class="controls">
+                <label for="kInput"><strong>Private Key (k):</strong></label>
+                <input type="number" id="kInput" value="6" min="1" max="100">
+                <button id="calcBtn" onclick="startCalculation()">Generate Public Key</button>
+            </div>
+            <p class="term-highlight" style="margin: 0; font-size: 0.9em;">* Note: The calculation runs with an artificial delay (Guru Level) to visualize the point bouncing on the curve.</p>
+        </div>
+
+        <!-- Visualization -->
+        <div class="panel canvas-container">
+            <h3>Visual Representation</h3>
+            <canvas id="eccCanvas" width="400" height="400"></canvas>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Grid represents coordinates modulo 17</p>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="panel">
+            <h3>Execution Log</h3>
+            <div class="terminal" id="logOutput">
+                <p>Waiting for input...</p>
+            </div>
+        </div>
+
+        <!-- Statistical Report -->
+        <div class="panel full-width">
+            <h2>Statistical Exploration & Analysis</h2>
+            
+            <div class="report-section">
+                <h3>1. Experimental Observations (Varying k)</h3>
+                <p>By experimenting with different scalar values ($k$), the resulting coordinates $x$ and $y$ on the discrete plane modulo 17 demonstrate <strong>apparent uniformity</strong>. The points do not cluster linearly but are scattered pseudo-randomly across the finite field space. There is zero linear <strong>correlation between input and output</strong>: advancing the private key from $k$ to $k+1$ causes the resulting point to jump to a completely unrelated geometric position, exhibiting extreme unpredictability.</p>
+            </div>
+
+            <div class="report-section">
+                <h3>2. One-Way Functions vs Cryptographic Hash Functions</h3>
+                <p><strong>Relevant for ECC (Cryptographic One-Way Functions):</strong></p>
+                <ul>
+                    <li><strong>Hardness of Inversion (ECDLP):</strong> The chaotic scattering of points ensures that deriving $k$ from $Q$ requires exhaustive search.</li>
+                    <li><strong>Algebraic Structure:</strong> The algorithm preserves a strict underlying additive homomorphism. We mathematically know that $k_1G + k_2G = (k_1 + k_2)G$. This structure is mandatory for protocols like ECDSA.</li>
+                </ul>
+                <p><strong>Relevant specifically for Cryptographic Hash Functions:</strong></p>
+                <ul>
+                    <li><strong>Destruction of Structure:</strong> A hash function must <em>not</em> possess exploitable algebraic relationships (homomorphisms are a flaw in hashing).</li>
+                    <li><strong>Strict Avalanche Criterion:</strong> Hash functions are explicitly designed so that a 1-bit change in an input of arbitrary length diffuses uniformly across a fixed-length bit array. In ECC, the domain is strictly mapped to valid points in the curve's subgroup.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const p = 17, a = 0, b = 7;
+        const G = { x: 1, y: 5 };
+        const scale = 400 / 18; // Canvas scaling
+
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        function modInverse(n, m) {
+            n = mod(n, m);
+            for (let i = 1; i < m; i++) {
+                if (mod(n * i, m) === 1) return i;
+            }
+            return null;
+        }
+
+        function addPoints(P, Q) {
+            if (P === null) return Q;
+            if (Q === null) return P;
+
+            let lambda;
+            if (P.x === Q.x && P.y === Q.y) {
+                if (P.y === 0) return null; 
+                let num = mod(3 * P.x * P.x + a, p);
+                let den = modInverse(2 * P.y, p);
+                if (den === null) return null;
+                lambda = mod(num * den, p);
+            } else {
+                if (P.x === Q.x) return null; 
+                let num = mod(Q.y - P.y, p);
+                let den = modInverse(Q.x - P.x, p);
+                if (den === null) return null;
+                lambda = mod(num * den, p);
+            }
+
+            let xr = mod(lambda * lambda - P.x - Q.x, p);
+            let yr = mod(lambda * (P.x - xr) - P.y, p);
+            return { x: xr, y: yr };
+        }
+
+        function drawGrid(ctx) {
+            ctx.clearRect(0, 0, 400, 400);
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= p; i++) {
+                ctx.beginPath(); 
+                ctx.moveTo(i * scale, 0); 
+                ctx.lineTo(i * scale, 400); 
+                ctx.stroke();
+                
+                ctx.beginPath(); 
+                ctx.moveTo(0, i * scale); 
+                ctx.lineTo(400, i * scale); 
+                ctx.stroke();
+            }
+        }
+
+        function drawPoint(ctx, point, color, label, isBase = false) {
+            if (point === null) return;
+            
+            // Invert Y for standard Cartesian display
+            let px = point.x * scale + scale / 2;
+            let py = (17 - point.y) * scale - scale / 2;
+            
+            ctx.beginPath();
+            ctx.arc(px, py, isBase ? 6 : 8, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            
+            if (label) {
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 12px monospace";
+                ctx.fillText(label, px + 12, py + 4);
+            }
+        }
+
+        function logToTerminal(msg, className = "") {
+            const terminal = document.getElementById('logOutput');
+            const p = document.createElement('p');
+            p.innerHTML = msg;
+            if(className) p.className = className;
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function startCalculation() {
+            const btn = document.getElementById('calcBtn');
+            const k = parseInt(document.getElementById('kInput').value);
+            const ctx = document.getElementById('eccCanvas').getContext('2d');
+            
+            if(isNaN(k) || k < 1) {
+                alert("Please enter a valid positive integer for k.");
+                return;
+            }
+
+            btn.disabled = true;
+            document.getElementById('logOutput').innerHTML = '';
+            drawGrid(ctx);
+
+            logToTerminal(`Initializing curve y² = x³ + 7 mod 17...`);
+            logToTerminal(`Target: compute Q = ${k}G`);
+            logToTerminal(`-----------------------------------`);
+
+            let currentPoint = G;
+            drawPoint(ctx, G, "#3b82f6", "1G", true);
+            logToTerminal(`[Step 1] 1G = (${currentPoint.x}, ${currentPoint.y})`);
+
+            for (let i = 2; i <= k; i++) {
+                await new Promise(resolve => setTimeout(resolve, 800)); 
+                
+                currentPoint = addPoints(currentPoint, G);
+                drawGrid(ctx); 
+                drawPoint(ctx, G, "#3b82f6", "G", true); // Keep base point visible
+                
+                if (currentPoint === null) {
+                    logToTerminal(`[Step ${i}] ${i}G = Point at Infinity`, "term-highlight");
+                    break;
+                }
+                
+                let isFinal = (i === k);
+                let color = isFinal ? "#10b981" : "#f59e0b";
+                drawPoint(ctx, currentPoint, color, `${i}G`);
+                logToTerminal(`[Step ${i}] ${i}G = (${currentPoint.x}, ${currentPoint.y})`);
+            }
+
+            if (currentPoint !== null) {
+                logToTerminal(`-----------------------------------`);
+                logToTerminal(`Calculation complete.`, "term-success");
+                logToTerminal(`PUBLIC KEY (Q) = (${currentPoint.x}, ${currentPoint.y})`, "term-success");
+            }
+            btn.disabled = false;
+        }
+
+        // Initial draw
+        window.onload = () => {
+            const ctx = document.getElementById('eccCanvas').getContext('2d');
+            drawGrid(ctx);
+            drawPoint(ctx, G, "#3b82f6", "G", true);
+        };
+    </script>
+</body>
+</html>

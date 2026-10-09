@@ -1,150 +1,320 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ECC Toy Curve - HMWK 1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tommaso Cenciotti - Statistics in Cybersecurity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: system-ui, sans-serif; margin: 30px; background-color: #f9f9f9; color: #333; }
-        .container { display: flex; gap: 20px; }
-        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        canvas { border: 1px solid #ddd; background: #fff; }
-        .log { background: #1e1e1e; color: #0f0; padding: 15px; height: 310px; overflow-y: auto; font-family: monospace; border-radius: 5px; width: 300px; }
-        button { background: #0066cc; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #0052a3; }
-        input { padding: 8px; width: 60px; margin-right: 10px; }
+        :root {
+            --bg-main: #0f172a;      /* slate-900 */
+            --bg-card: #1e293b;      /* slate-800 */
+            --bg-card-hover: #1e293b;
+            --text-main: #f8fafc;    /* slate-50 */
+            --text-muted: #94a3b8;   /* slate-400 */
+            --accent-cyan: #06b6d4;  /* cyan-500 */
+            --accent-blue: #3b82f6;  /* blue-500 */
+            --border-color: #334155; /* slate-700 */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        header {
+            padding: 5rem 2rem 3rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .hero-name {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .hero-program {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        .hero-course {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1.25rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 9999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+        }
+
+        main {
+            flex: 1;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card.active:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(6, 182, 212, 0.15);
+        }
+
+        .card.active:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .hw-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+        
+        .card.active .hw-badge {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-cyan);
+        }
+
+        .card-icon {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .card.active:hover .card-icon {
+            color: var(--accent-blue);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            flex: 1;
+        }
+
+        .card.locked {
+            opacity: 0.6;
+            filter: grayscale(80%);
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+        
+        .card.locked .hw-badge {
+            background: transparent;
+            border: 1px solid var(--border-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .social-links {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .social-links a {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover {
+            color: var(--accent-cyan);
+        }
+        
+        /* Sparkle effect on active cards */
+        .card.active .arrow-icon {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            color: var(--accent-cyan);
+        }
+        
+        .card.active:hover .arrow-icon {
+            opacity: 1;
+            transform: translateX(0);
+        }
     </style>
 </head>
 <body>
-    <h2>Elliptic-Curve Scalar Multiplication (Toy Curve)</h2>
-    <p>Curva: <strong>y² = x³ + 7 (mod 17)</strong> | Base Point: <strong>G = (1, 5)</strong></p>
-    
-    <div style="margin-bottom: 20px;">
-        <label>Private Key k: <input type="number" id="kInput" value="6" min="1"></label>
-        <button onclick="startCalculation()">Calcola Public Key</button>
-    </div>
 
-    <div class="container">
-        <div class="panel">
-            <canvas id="eccCanvas" width="340" height="340"></canvas>
-            <p style="text-align: center; font-size: 0.9em; color: #666;">Griglia 17x17 (Coordinate Modulo 17)</p>
+    <header>
+        <h1 class="hero-name">Tommaso Cenciotti</h1>
+        <p class="hero-program">Cybersecurity Master's Program &bull; Sapienza Università di Roma</p>
+        <div class="hero-course">
+            <i class="fa-solid fa-shield-halved"></i>
+            Statistics in Cybersecurity
         </div>
-        <div class="panel">
-            <div class="log" id="logOutput">In attesa di calcolo...</div>
+    </header>
+
+    <main>
+        <div class="grid-container">
+            
+            <!-- HW 1 - Active -->
+            <a href="hw1.html" class="card active">
+                <div class="card-header">
+                    <span class="hw-badge">HW 01</span>
+                    <i class="fa-solid fa-key card-icon"></i>
+                </div>
+                <h3 class="card-title">Elliptic-Curve Scalar Multiplication</h3>
+                <p class="card-desc">Visualizing cryptographic one-way functions using a secp256k1 toy curve model and exploring statistical properties.</p>
+                <i class="fa-solid fa-arrow-right arrow-icon"></i>
+            </a>
+
+            <!-- HW 2 - Active (Upcoming) -->
+            <a href="hw2.html" class="card active">
+                <div class="card-header">
+                    <span class="hw-badge">HW 02</span>
+                    <i class="fa-solid fa-code card-icon"></i>
+                </div>
+                <h3 class="card-title">Assignment 2 [Upcoming]</h3>
+                <p class="card-desc">Pending release. Click here once the assignment details are finalized and the hw2.html page is created.</p>
+                <i class="fa-solid fa-arrow-right arrow-icon"></i>
+            </a>
+
+            <!-- HW 3 - Locked -->
+            <div class="card locked">
+                <div class="card-header">
+                    <span class="hw-badge">HW 03</span>
+                    <i class="fa-solid fa-lock card-icon"></i>
+                </div>
+                <h3 class="card-title">Assignment 3</h3>
+                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
+            </div>
+
+            <!-- HW 4 - Locked -->
+            <div class="card locked">
+                <div class="card-header">
+                    <span class="hw-badge">HW 04</span>
+                    <i class="fa-solid fa-lock card-icon"></i>
+                </div>
+                <h3 class="card-title">Assignment 4</h3>
+                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
+            </div>
+
+            <!-- HW 5 - Locked -->
+            <div class="card locked">
+                <div class="card-header">
+                    <span class="hw-badge">HW 05</span>
+                    <i class="fa-solid fa-lock card-icon"></i>
+                </div>
+                <h3 class="card-title">Assignment 5</h3>
+                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
+            </div>
+
+            <!-- HW 6 - Locked -->
+            <div class="card locked">
+                <div class="card-header">
+                    <span class="hw-badge">HW 06</span>
+                    <i class="fa-solid fa-lock card-icon"></i>
+                </div>
+                <h3 class="card-title">Assignment 6</h3>
+                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
+            </div>
+
         </div>
-    </div>
+    </main>
 
-    <script>
-        // Parametri della curva giocattolo
-        const p = 17;
-        const a = 0;
-        const b = 7;
-        const G = { x: 1, y: 5 };
+    <footer>
+        <p>&copy; 2026 Tommaso Cenciotti. Created for Statistics in Cybersecurity.</p>
+        <div class="social-links">
+            <a href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="#" aria-label="University"><i class="fa-solid fa-graduation-cap"></i></a>
+        </div>
+    </footer>
 
-        // Funzione helper per il modulo matematico reale (gestisce i numeri negativi in JS)
-        function mod(n, m) {
-            return ((n % m) + m) % m;
-        }
-
-        // Inverso moltiplicativo modulare usando un approccio brute-force (ottimale per numeri primi piccoli come 17)
-        function modInverse(n, m) {
-            n = mod(n, m);
-            for (let i = 1; i < m; i++) {
-                if (mod(n * i, m) === 1) return i;
-            }
-            return null;
-        }
-
-        // Addizione di punti su curva ellittica
-        function addPoints(P, Q) {
-            if (P === null) return Q;
-            if (Q === null) return P;
-
-            let lambda;
-            // Caso P == Q (Point Doubling)
-            if (P.x === Q.x && P.y === Q.y) {
-                if (P.y === 0) return null; // Punto all'infinito
-                let num = mod(3 * P.x * P.x + a, p);
-                let den = modInverse(2 * P.y, p);
-                if (den === null) return null;
-                lambda = mod(num * den, p);
-            } 
-            // Caso P != Q (Point Addition)
-            else {
-                if (P.x === Q.x) return null; // Punto all'infinito
-                let num = mod(Q.y - P.y, p);
-                let den = modInverse(Q.x - P.x, p);
-                if (den === null) return null;
-                lambda = mod(num * den, p);
-            }
-
-            let xr = mod(lambda * lambda - P.x - Q.x, p);
-            let yr = mod(lambda * (P.x - xr) - P.y, p);
-            return { x: xr, y: yr };
-        }
-
-        // Funzioni di visualizzazione
-        const scale = 20;
-        
-        function drawGrid(ctx) {
-            ctx.clearRect(0, 0, 340, 340);
-            ctx.strokeStyle = '#eee';
-            for (let i = 0; i <= p; i++) {
-                ctx.beginPath(); ctx.moveTo(i * scale, 0); ctx.lineTo(i * scale, 340); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, i * scale); ctx.lineTo(340, i * scale); ctx.stroke();
-            }
-        }
-
-        function drawPoint(ctx, point, color, label) {
-            if (point === null) return;
-            // Invertiamo l'asse Y solo per la visualizzazione su Canvas (0 in basso)
-            let px = point.x * scale + scale / 2;
-            let py = (16 - point.y) * scale + scale / 2; 
-            
-            ctx.beginPath();
-            ctx.arc(px, py, 6, 0, 2 * Math.PI);
-            ctx.fillStyle = color;
-            ctx.fill();
-            
-            ctx.fillStyle = "black";
-            ctx.font = "bold 11px Arial";
-            ctx.fillText(label, px + 8, py + 4);
-        }
-
-        // Funzione principale asincrona per permettere il rallentamento (Guru Level)
-        async function startCalculation() {
-            const k = parseInt(document.getElementById('kInput').value);
-            const log = document.getElementById('logOutput');
-            const ctx = document.getElementById('eccCanvas').getContext('2d');
-            
-            log.innerHTML = '';
-            drawGrid(ctx);
-
-            let currentPoint = G;
-            log.innerHTML += `1G = (${currentPoint.x}, ${currentPoint.y})\n`;
-            drawPoint(ctx, currentPoint, "#ff4444", "1G");
-
-            for (let i = 2; i <= k; i++) {
-                await new Promise(resolve => setTimeout(resolve, 800)); // Rallentamento di 800ms
-                
-                currentPoint = addPoints(currentPoint, G);
-                
-                if (currentPoint === null) {
-                    log.innerHTML += `${i}G = Punto all'Infinito\n`;
-                    break;
-                }
-                
-                let isFinal = (i === k);
-                log.innerHTML += `${i}G = (${currentPoint.x}, ${currentPoint.y})\n`;
-                drawPoint(ctx, currentPoint, isFinal ? "#00cc00" : "#ff9900", `${i}G`);
-                log.scrollTop = log.scrollHeight;
-            }
-
-            if (currentPoint !== null) {
-                log.innerHTML += `\n====================\n`;
-                log.innerHTML += `TOY PUBLIC KEY (Q): \n(${currentPoint.x}, ${currentPoint.y})\n`;
-                log.innerHTML += `====================\n`;
-            }
-        }
-    </script>
 </body>
 </html>
