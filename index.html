@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tommaso Cenciotti - Statistics in Cybersecurity</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>Tommaso Cenciotti — Statistics in Cybersecurity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --bg-main: #0f172a;      /* slate-900 */
-            --bg-card: #1e293b;      /* slate-800 */
-            --bg-card-hover: #1e293b;
-            --text-main: #f8fafc;    /* slate-50 */
-            --text-muted: #94a3b8;   /* slate-400 */
-            --accent-cyan: #06b6d4;  /* cyan-500 */
-            --accent-blue: #3b82f6;  /* blue-500 */
-            --border-color: #334155; /* slate-700 */
+            --bg-main: #090d16;
+            --bg-card: rgba(17, 24, 39, 0.8);
+            --bg-card-hover: rgba(30, 41, 59, 0.95);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #06b6d4;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #10b981;
+            --border-color: rgba(51, 65, 85, 0.65);
+            --border-glow: rgba(6, 182, 212, 0.5);
         }
 
         * {
@@ -34,76 +37,143 @@
             display: flex;
             flex-direction: column;
             background-image: 
-                radial-gradient(circle at 15% 50%, rgba(6, 182, 212, 0.04) 0%, transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+                radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
         }
 
-        a { text-decoration: none; color: inherit; }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
 
+        /* Header & Hero Section */
         header {
-            padding: 5rem 2rem 3rem;
+            padding: 4rem 2rem 2.75rem;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            position: relative;
+            background: rgba(9, 13, 22, 0.8);
+            backdrop-filter: blur(16px);
+        }
+
+        .university-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
         }
 
         .hero-name {
-            font-size: 3rem;
+            font-size: clamp(2.2rem, 4.5vw, 3.25rem);
             font-weight: 700;
-            letter-spacing: -0.05em;
+            letter-spacing: -0.04em;
             margin-bottom: 0.5rem;
-            background: linear-gradient(to right, var(--accent-cyan), var(--accent-blue));
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 55%, var(--accent-blue) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: inline-block;
+            display: block;
         }
 
         .hero-program {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--text-muted);
-            margin-bottom: 1.5rem;
-            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto 1.75rem;
+            font-weight: 400;
         }
 
-        .hero-course {
+        .meta-bar {
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .meta-pill {
             display: inline-flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem 1.25rem;
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            gap: 0.55rem;
+            padding: 0.45rem 1rem;
+            background: rgba(30, 41, 59, 0.65);
+            border: 1px solid var(--border-color);
             border-radius: 9999px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
+            color: var(--text-main);
+        }
+
+        .meta-pill i {
             color: var(--accent-cyan);
         }
 
+        /* Main Content & Grid */
         main {
             flex: 1;
-            padding: 4rem 2rem;
-            max-width: 1200px;
+            padding: 3rem 2rem 4.5rem;
+            max-width: 1220px;
             margin: 0 auto;
             width: 100%;
         }
 
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 2rem;
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
         }
 
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .section-title i {
+            color: var(--accent-cyan);
+        }
+
+        .section-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+            align-items: stretch;
+        }
+
+        /* Cards */
         .card {
             background-color: var(--bg-card);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 2rem;
+            padding: 1.75rem;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
         }
 
         .card::before {
@@ -112,207 +182,430 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 4px;
-            background: linear-gradient(to right, var(--accent-cyan), var(--accent-blue));
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
         .card.active:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(6, 182, 212, 0.15);
+            transform: translateY(-5px);
+            background-color: var(--bg-card-hover);
+            border-color: var(--border-glow);
+            box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.12);
         }
 
         .card.active:hover::before {
             opacity: 1;
         }
 
-        .card-header {
+        .card-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.15rem;
+        }
+
+        .badges {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .hw-badge {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            padding: 0.25rem 0.75rem;
+            padding: 0.25rem 0.65rem;
             border-radius: 6px;
             background: rgba(255, 255, 255, 0.05);
             color: var(--text-muted);
         }
-        
+
         .card.active .hw-badge {
-            background: rgba(6, 182, 212, 0.1);
+            background: rgba(6, 182, 212, 0.12);
             color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.25);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--accent-emerald);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-emerald);
+            box-shadow: 0 0 6px var(--accent-emerald);
         }
 
         .card-icon {
-            font-size: 1.25rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
             color: var(--text-muted);
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .card.active:hover .card-icon {
-            color: var(--accent-blue);
+            color: var(--accent-cyan);
+            border-color: rgba(6, 182, 212, 0.35);
+            background: rgba(6, 182, 212, 0.1);
         }
 
         .card-title {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 600;
-            margin-bottom: 0.75rem;
-            line-height: 1.4;
+            margin-bottom: 0.6rem;
+            line-height: 1.35;
+            color: var(--text-main);
         }
 
         .card-desc {
             color: var(--text-muted);
-            font-size: 0.95rem;
-            flex: 1;
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
         }
 
+        .card-desc code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: #e2e8f0;
+            background: rgba(15, 23, 42, 0.7);
+            padding: 0.1rem 0.35rem;
+            border-radius: 4px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .topic-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .topic-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border-color);
+            color: #cbd5e1;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.9rem;
+            border-top: 1px solid rgba(51, 65, 85, 0.45);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-cyan);
+            font-weight: 500;
+        }
+
+        .card.active .arrow-icon {
+            transition: transform 0.25s ease;
+        }
+
+        .card.active:hover .arrow-icon {
+            transform: translateX(4px);
+        }
+
+        /* Locked State */
         .card.locked {
-            opacity: 0.6;
-            filter: grayscale(80%);
+            opacity: 0.55;
             cursor: not-allowed;
             border-style: dashed;
+            background: rgba(15, 23, 42, 0.45);
         }
-        
+
         .card.locked .hw-badge {
             background: transparent;
             border: 1px solid var(--border-color);
         }
 
+        .card.locked .card-footer {
+            color: var(--text-muted);
+        }
+
+        /* Footer */
         footer {
             text-align: center;
-            padding: 2rem;
+            padding: 2.25rem 2rem;
             border-top: 1px solid var(--border-color);
             color: var(--text-muted);
-            font-size: 0.9rem;
-            background: rgba(15, 23, 42, 0.9);
+            font-size: 0.85rem;
+            background: rgba(9, 13, 22, 0.9);
         }
 
         .social-links {
-            margin-top: 1rem;
+            margin-top: 0.85rem;
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
+            gap: 1rem;
         }
 
         .social-links a {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--text-muted);
-            font-size: 1.2rem;
-            transition: color 0.2s;
+            font-size: 1rem;
+            transition: all 0.2s;
         }
 
         .social-links a:hover {
             color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.08);
         }
-        
-        /* Sparkle effect on active cards */
-        .card.active .arrow-icon {
-            position: absolute;
-            bottom: 2rem;
-            right: 2rem;
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.3s ease;
-            color: var(--accent-cyan);
+
+        @media (max-width: 1024px) {
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-        
-        .card.active:hover .arrow-icon {
-            opacity: 1;
-            transform: translateX(0);
+
+        @media (max-width: 680px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.4rem;
+            }
         }
     </style>
 </head>
 <body>
 
     <header>
+        <div class="university-tag">
+            <i class="fa-solid fa-building-columns"></i>
+            Sapienza Università di Roma &bull; M.Sc. in Cybersecurity
+        </div>
         <h1 class="hero-name">Tommaso Cenciotti</h1>
-        <p class="hero-program">Cybersecurity Master's Program &bull; Sapienza Università di Roma</p>
-        <div class="hero-course">
-            <i class="fa-solid fa-shield-halved"></i>
-            Statistics in Cybersecurity
+        <p class="hero-program">
+            Interactive laboratory and statistical explorations of cryptographic primitives, stochastic processes, and probability models in cybersecurity.
+        </p>
+        <div class="meta-bar">
+            <span class="meta-pill">
+                <i class="fa-solid fa-shield-halved"></i>
+                Course: Statistics in Cybersecurity
+            </span>
+            <span class="meta-pill">
+                <i class="fa-solid fa-code-branch"></i>
+                Completed: 2 / 6 Modules
+            </span>
+            <span class="meta-pill">
+                <i class="fa-solid fa-calendar-check"></i>
+                A.Y. 2026 / 2027
+            </span>
         </div>
     </header>
 
     <main>
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fa-solid fa-terminal"></i>
+                Coursework &amp; Interactive Simulations
+            </h2>
+            <span class="section-subtitle">Select an active module to launch the simulation and report</span>
+        </div>
+
         <div class="grid-container">
             
-            <!-- HW 1 - Active -->
+            <!-- HW 1 -->
             <a href="hw1.html" class="card active">
-                <div class="card-header">
-                    <span class="hw-badge">HW 01</span>
-                    <i class="fa-solid fa-key card-icon"></i>
+                <div>
+                    <div class="card-top">
+                        <span class="badges">
+                            <span class="hw-badge">HMWK 01</span>
+                            <span class="status-pill"><span class="status-dot"></span>Completed</span>
+                        </span>
+                        <span class="card-icon"><i class="fa-solid fa-bezier-curve"></i></span>
+                    </div>
+                    <h3 class="card-title">Public-Key Cryptography: Private Key &rarr; Public Key in Ethereum</h3>
+                    <p class="card-desc">
+                        Interactive visualization of elliptic-curve scalar multiplication (<code>Q = kG</code>) on the finite field toy curve <code>y&sup2; &equiv; x&sup3; + 7 (mod 17)</code>. Includes statistical analysis of coordinate uniformity, bit distribution, and avalanche behavior.
+                    </p>
                 </div>
-                <h3 class="card-title">Elliptic-Curve Scalar Multiplication</h3>
-                <p class="card-desc">Visualizing cryptographic one-way functions using a secp256k1 toy curve model and exploring statistical properties.</p>
-                <i class="fa-solid fa-arrow-right arrow-icon"></i>
+                <div>
+                    <div class="topic-tags">
+                        <span class="topic-tag">secp256k1</span>
+                        <span class="topic-tag">ECDLP</span>
+                        <span class="topic-tag">GF(17)</span>
+                        <span class="topic-tag">One-Way vs Hash</span>
+                    </div>
+                    <div class="card-footer">
+                        <span>Launch Simulation &amp; Report</span>
+                        <i class="fa-solid fa-arrow-right arrow-icon"></i>
+                    </div>
+                </div>
             </a>
 
-            <!-- HW 2 - Active -->
+            <!-- HW 2 -->
             <a href="hw2.html" class="card active">
-                <div class="card-header">
-                    <span class="hw-badge">HW 02</span>
-                    <i class="fa-solid fa-wallet card-icon"></i>
+                <div>
+                    <div class="card-top">
+                        <span class="badges">
+                            <span class="hw-badge">HMWK 02</span>
+                            <span class="status-pill"><span class="status-dot"></span>Completed</span>
+                        </span>
+                        <span class="card-icon"><i class="fa-solid fa-wallet"></i></span>
+                    </div>
+                    <h3 class="card-title">From Wallet Seed to Ethereum Address: Pipeline &amp; Primitives</h3>
+                    <p class="card-desc">
+                        End-to-end cryptographic exploration of Ethereum HD wallets: entropy encoding, PBKDF2 stretching, hierarchical key derivation, elliptic-curve keypairs, sponge hashing, and mixed-case error detection.
+                    </p>
                 </div>
-                <h3 class="card-title">Wallet Seed to Ethereum Address</h3>
-                <p class="card-desc">Exploring cryptographic primitives, key derivation (BIP-32/39/44), hashing (Keccak-256), and EIP-55 checksums.</p>
-                <i class="fa-solid fa-arrow-right arrow-icon"></i>
+                <div>
+                    <div class="topic-tags">
+                        <span class="topic-tag">BIP-39 / 32 / 44</span>
+                        <span class="topic-tag">secp256k1</span>
+                        <span class="topic-tag">Keccak-256 vs SHA-3</span>
+                        <span class="topic-tag">EIP-55</span>
+                    </div>
+                    <div class="card-footer">
+                        <span>Explore Pipeline &amp; Analysis</span>
+                        <i class="fa-solid fa-arrow-right arrow-icon"></i>
+                    </div>
+                </div>
             </a>
 
-            <!-- HW 3 - Locked -->
-            <div class="card locked">
-                <div class="card-header">
-                    <span class="hw-badge">HW 03</span>
-                    <i class="fa-solid fa-lock card-icon"></i>
+            <!-- HW 3 -->
+            <article class="card locked">
+                <div>
+                    <div class="card-top">
+                        <span class="badges">
+                            <span class="hw-badge">HMWK 03</span>
+                        </span>
+                        <span class="card-icon"><i class="fa-solid fa-lock"></i></span>
+                    </div>
+                    <h3 class="card-title">Assignment 03</h3>
+                    <p class="card-desc">
+                        Upcoming module. The simulation and statistical exploration will be published upon release of the weekly specification.
+                    </p>
                 </div>
-                <h3 class="card-title">Assignment 3</h3>
-                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
-            </div>
+                <div>
+                    <div class="topic-tags">
+                        <span class="topic-tag">Scheduled</span>
+                    </div>
+                    <div class="card-footer">
+                        <span>Locked Module</span>
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+            </article>
 
-            <!-- HW 4 - Locked -->
-            <div class="card locked">
-                <div class="card-header">
-                    <span class="hw-badge">HW 04</span>
-                    <i class="fa-solid fa-lock card-icon"></i>
+            <!-- HW 4 -->
+            <article class="card locked">
+                <div>
+                    <div class="card-top">
+                        <span class="badges">
+                            <span class="hw-badge">HMWK 04</span>
+                        </span>
+                        <span class="card-icon"><i class="fa-solid fa-lock"></i></span>
+                    </div>
+                    <h3 class="card-title">Assignment 04</h3>
+                    <p class="card-desc">
+                        Upcoming module. The simulation and statistical exploration will be published upon release of the weekly specification.
+                    </p>
                 </div>
-                <h3 class="card-title">Assignment 4</h3>
-                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
-            </div>
+                <div>
+                    <div class="topic-tags">
+                        <span class="topic-tag">Scheduled</span>
+                    </div>
+                    <div class="card-footer">
+                        <span>Locked Module</span>
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+            </article>
 
-            <!-- HW 5 - Locked -->
-            <div class="card locked">
-                <div class="card-header">
-                    <span class="hw-badge">HW 05</span>
-                    <i class="fa-solid fa-lock card-icon"></i>
+            <!-- HW 5 -->
+            <article class="card locked">
+                <div>
+                    <div class="card-top">
+                        <span class="badges">
+                            <span class="hw-badge">HMWK 05</span>
+                        </span>
+                        <span class="card-icon"><i class="fa-solid fa-lock"></i></span>
+                    </div>
+                    <h3 class="card-title">Assignment 05</h3>
+                    <p class="card-desc">
+                        Upcoming module. The simulation and statistical exploration will be published upon release of the weekly specification.
+                    </p>
                 </div>
-                <h3 class="card-title">Assignment 5</h3>
-                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
-            </div>
+                <div>
+                    <div class="topic-tags">
+                        <span class="topic-tag">Scheduled</span>
+                    </div>
+                    <div class="card-footer">
+                        <span>Locked Module</span>
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+            </article>
 
-            <!-- HW 6 - Locked -->
-            <div class="card locked">
-                <div class="card-header">
-                    <span class="hw-badge">HW 06</span>
-                    <i class="fa-solid fa-lock card-icon"></i>
+            <!-- HW 6 -->
+            <article class="card locked">
+                <div>
+                    <div class="card-top">
+                        <span class="badges">
+                            <span class="hw-badge">HMWK 06</span>
+                        </span>
+                        <span class="card-icon"><i class="fa-solid fa-lock"></i></span>
+                    </div>
+                    <h3 class="card-title">Assignment 06</h3>
+                    <p class="card-desc">
+                        Upcoming module. The simulation and statistical exploration will be published upon release of the weekly specification.
+                    </p>
                 </div>
-                <h3 class="card-title">Assignment 6</h3>
-                <p class="card-desc">Locked. This assignment will be unlocked later in the semester.</p>
-            </div>
+                <div>
+                    <div class="topic-tags">
+                        <span class="topic-tag">Scheduled</span>
+                    </div>
+                    <div class="card-footer">
+                        <span>Locked Module</span>
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+            </article>
 
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2026 Tommaso Cenciotti. Created for Statistics in Cybersecurity.</p>
+        <p>&copy; 2026 Tommaso Cenciotti &bull; Hosted on <strong>tommasocenciotti.com</strong></p>
         <div class="social-links">
-            <a href="#" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-            <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
-            <a href="#" aria-label="University"><i class="fa-solid fa-graduation-cap"></i></a>
+            <a href="https://github.com/" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="https://www.uniroma1.it/" target="_blank" rel="noopener" aria-label="University"><i class="fa-solid fa-graduation-cap"></i></a>
         </div>
     </footer>
 
