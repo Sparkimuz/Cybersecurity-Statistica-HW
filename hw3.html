@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMWK 03 — Cryptographic Primitives, Caesar Cipher & Statistical Cryptanalysis | Tommaso Cenciotti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #090d16;
+            --bg-card: rgba(17, 24, 39, 0.85);
+            --bg-panel-inner: rgba(15, 23, 42, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-cyan: #06b6d4;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --border-color: rgba(51, 65, 85, 0.65);
+            --border-glow: rgba(6, 182, 212, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.65;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(circle at 12% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 88% 28%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* Top Header */
+        header {
+            background: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hw-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            background: rgba(6, 182, 212, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .header-titles h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .header-titles p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            max-width: 1280px;
+            width: 100%;
+            margin: 2.25rem auto 4rem;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .panel-title i { color: var(--accent-cyan); }
+
+        .panel-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        p strong, li strong {
+            color: var(--text-main);
+        }
+
+        ul, ol {
+            color: var(--text-muted);
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        li {
+            margin-bottom: 0.4rem;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .interactive-box {
+            background: var(--bg-panel-inner);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        input[type="text"], textarea, select {
+            background: rgba(9, 13, 22, 0.9);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.65rem 0.9rem;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.65rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .output-box {
+            background: rgba(9, 13, 22, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.15rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.84rem;
+            color: #38bdf8;
+            margin-top: 1rem;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        .results-flex {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        .result-card {
+            background: rgba(9, 13, 22, 0.75);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.15rem;
+        }
+
+        .result-card h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-amber);
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+            gap: 1.75rem;
+            margin-top: 1.75rem;
+        }
+
+        @media (max-width: 1100px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-panel-inner);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+        }
+
+        .chart-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            background: rgba(9, 13, 22, 0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(51, 65, 85, 0.4);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.25rem;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            background: rgba(30, 41, 59, 0.6);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            color: var(--text-muted);
+        }
+
+        .comparison-table td:first-child {
+            color: var(--text-main);
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2.25rem 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: rgba(9, 13, 22, 0.9);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <div class="header-left">
+                <span class="hw-tag">HMWK 03</span>
+                <div class="header-titles">
+                    <h1>Cryptographic Primitives, Caesar Cipher & Statistical Cryptanalysis</h1>
+                    <p>Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+                </div>
+            </div>
+            <a href="index.html" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i> Back to Hub
+            </a>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- SECTION 1: ECC ElGamal Encryption & Toy Scheme Analysis -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-key"></i> 1. Toy Cryptographic Scheme based on secp256k1 &amp; EC-ElGamal</h2>
+                <span class="panel-badge">Finite Field GF(17) &bull; y&sup2; &equiv; x&sup3; + 7 (mod 17)</span>
+            </div>
+
+            <p>
+                In Part 1 of Homework 1, we examined the elliptic curve <strong>y&sup2; &equiv; x&sup3; + 7 (mod 17)</strong>, which forms a cyclic group of 18 points (17 affine points + the point at infinity &infin;). Using base point <strong>G = (15, 13)</strong> of order 18, we build a toy asymmetric encryption scheme analogous to <strong>EC-ElGamal</strong>.
+            </p>
+
+            <h3>Algorithm Steps &amp; Key Roles</h3>
+            <ul>
+                <li><strong>Key Generation (Bob):</strong> Bob chooses a private scalar <code>k<sub>B</sub></code> from a restricted range (e.g., <code>1 &le; k<sub>B</sub> &lt; 18</code>) and computes his public key <code>Q<sub>B</sub> = k<sub>B</sub> &middot; G</code>.</li>
+                <li><strong>Encryption (Alice):</strong> To encrypt a message point <code>M</code> (which is a valid point on the curve), Alice picks a random ephemeral integer <code>r</code>, computes ciphertext component <code>C<sub>1</sub> = r &middot; G</code>, and shared secret mask <code>S = r &middot; Q<sub>B</sub></code>. The second ciphertext component is <code>C<sub>2</sub> = M + S</code>.</li>
+                <li><strong>Decryption (Bob):</strong> Bob receives <code>(C<sub>1</sub>, C<sub>2</sub>)</code>. He computes his shared secret mask <code>S' = k<sub>B</sub> &middot; C<sub>1</sub> = k<sub>B</sub>(rG) = r(k<sub>B</sub>G) = rQ<sub>B</sub> = S</code>, and recovers the plaintext message point by point subtraction: <code>M = C<sub>2</sub> - S' = C<sub>2</sub> + (-S')</code>.</li>
+            </ul>
+
+            <div class="interactive-box">
+                <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);"><i class="fa-solid fa-terminal"></i> Interactive EC-ElGamal Simulation</h3>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Bob's Private Key (k<sub>B</sub> ∈ [1, 17])</label>
+                        <input type="text" id="elgamalKb" value="7">
+                    </div>
+                    <div class="control-group">
+                        <label>Message Point M (x, y on GF(17))</label>
+                        <select id="elgamalMsgPoint">
+                            <option value="8,3">(8, 3) — Order 18</option>
+                            <option value="2,10">(2, 10)</option>
+                            <option value="12,1">(12, 1)</option>
+                            <option value="6,6">(6, 6)</option>
+                            <option value="5,8">(5, 8)</option>
+                            <option value="1,12">(1, 12)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Ephemeral Scalar r ∈ [1, 17]</label>
+                        <input type="text" id="elgamalEphemeral" value="5">
+                    </div>
+                </div>
+                <button class="btn" onclick="runElGamalSimulation()"><i class="fa-solid fa-play"></i> Run Encryption &amp; Decryption</button>
+                <div id="elgamalOutput" class="output-box" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Caesar Cipher & Comparative Analysis -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-book-open"></i> 2. The Caesar Cipher &amp; Comparative Analysis</h2>
+                <span class="panel-badge">Substitution Cipher &bull; Key Space = 26</span>
+            </div>
+
+            <p>
+                The <strong>Caesar Cipher</strong> is one of the simplest and most widely known substitution ciphers. It replaces each letter in the plaintext with a letter fixed positions down the alphabet (shift <code>k &infin; [0, 25]</code>).
+            </p>
+
+            <div class="interactive-box">
+                <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);"><i class="fa-solid fa-terminal"></i> Interactive Caesar Cipher Lab</h3>
+                <div class="controls-grid">
+                    <div class="control-group" style="grid-column: span 2;">
+                        <label>Plaintext Message</label>
+                        <textarea id="caesarPlain">SAPIENZA UNIVERSITY OF ROME CYBERSECURITY STATISTICS LABORATORY</textarea>
+                    </div>
+                    <div class="control-group">
+                        <label>Shift Key (k ∈ [0, 25])</label>
+                        <input type="text" id="caesarShift" value="13">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="runCaesarLab()"><i class="fa-solid fa-sync"></i> Encrypt &amp; Analyze</button>
+                </div>
+                <div id="caesarOutput" class="output-box" style="display:none;"></div>
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Comparison: Toy ECC vs. Caesar Cipher</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Cryptographic Feature</th>
+                        <th>Toy ECC Scheme (secp256k1 GF(17))</th>
+                        <th>Caesar Cipher</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Encryption / Decryption</td>
+                        <td>Algebraic group operations (scalar multiplication &amp; point addition). Relies on Elliptic Curve Discrete Logarithm Problem (ECDLP).</td>
+                        <td>Modular arithmetic letter substitution: <code>C = (P + k) mod 26</code>.</td>
+                    </tr>
+                    <tr>
+                        <td>Key Space</td>
+                        <td><code>18</code> points/scalars in toy GF(17); real secp256k1 has <code>~2<sup>256</sup></code> keys.</td>
+                        <td><code>26</code> possible shift keys (extremely small, trivial brute-force).</td>
+                    </tr>
+                    <tr>
+                        <td>Statistical Properties</td>
+                        <td>High pseudorandomness; output points decorrelate from input coordinates; passes avalanche tests.</td>
+                        <td>Preserves exact plaintext letter frequency distribution (shift invariant); vulnerable to frequency analysis.</td>
+                    </tr>
+                    <tr>
+                        <td>Security Foundation</td>
+                        <td>Computational hardness of ECDLP (Pollard's rho <code>O(&radic;n)</code>).</td>
+                        <td>Security by obscurity; zero computational complexity.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 3: Statistical Cryptanalysis of Caesar Cipher -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-chart-line"></i> 3. Statistical Cryptanalysis of the Caesar Cipher</h2>
+                <span class="panel-badge">Chi-Squared Goodness-of-Fit &bull; Letter Frequency Analysis</span>
+            </div>
+
+            <p>
+                Because the Caesar cipher preserves the monographic letter distribution of the underlying language, we can recover the key automatically without brute-forcing all 26 options. By computing the <strong>Chi-Squared (&chi;&sup2;) statistic</strong> between the decrypted letter counts and known English letter frequencies:
+            </p>
+            <p style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent-cyan);">
+                &chi;&sup2; = &sum; <sub>(i=A..Z)</sub> [ (O<sub>i</sub> - E<sub>i</sub>)&sup2; / E<sub>i</sub> ]
+            </p>
+            <p>
+                The shift key that minimizes &chi;&sup2; corresponds to the correct English plaintext.
+            </p>
+
+            <div class="interactive-box">
+                <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);"><i class="fa-solid fa-terminal"></i> Automated Statistical Key Recovery</h3>
+                <div class="controls-grid">
+                    <div class="control-group" style="grid-column: span 2;">
+                        <label>Ciphertext (or paste any ciphertext)</label>
+                        <textarea id="cryptanalysisInput">V NWVNY VNZREPBQR VQZWFNAP UBJ GVSFGBGNYYNZRAGRA SRSSBE ERFREUVXR FGNGVFGNVSHZRF</textarea>
+                    </div>
+                    <div class="control-group">
+                        <label>Text Length / Corpus Size</label>
+                        <select id="corpusLengthSelect" onchange="updateCorpusSample()">
+                            <option value="short">Short (approx. 50 chars)</option>
+                            <option value="medium" selected>Medium (approx. 200 chars)</option>
+                            <option value="long">Long (approx. 1000+ chars)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="runStatisticalCryptanalysis()"><i class="fa-solid fa-wand-magic-sparkles"></i> Recover Key via Chi-Squared Analysis</button>
+                <div id="cryptanalysisResult" class="output-box" style="display:none;"></div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">Letter Frequency Distribution</div>
+                            <div class="chart-sub">Ciphertext vs. English Expected Frequency</div>
+                        </div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="freqChart" width="540" height="260"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">&chi;&sup2; Goodness-of-Fit across 26 Shifts</div>
+                            <div class="chart-sub">Minimum &chi;&sup2; identifies the correct key</div>
+                        </div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="chiChart" width="540" height="260"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Restricted Key Space Attack on Toy ECC -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-bug"></i> 4. Restricted Key Space Attack on Toy ECC</h2>
+                <span class="panel-badge">Baby-Step Giant-Step &bull; Pollard's Rho &bull; Exhaustive Search</span>
+            </div>
+
+            <p>
+                The toy ECC scheme developed in Part 1 uses the <code>secp256k1</code> curve equation over <strong>GF(17)</strong>, but restricts the private key <code>k</code> to a small range (e.g., <code>1 &le; k &lt; 18</code>) to make experiments computationally feasible.
+            </p>
+
+            <h3>Key Attack Vectors against Restricted ECC</h3>
+            <ul>
+                <li><strong>Exhaustive Key Search (Brute Force):</strong> Because the private key space is only <code>n = 18</code>, an attacker can simply iterate <code>k = 1, 2, ..., 17</code>, compute <code>kG</code>, and match it against the target public key <code>Q</code> in microseconds.</li>
+                <li><strong>Baby-Step Giant-Step (BSGS):</strong> A meet-in-the-middle algorithm that solves the ECDLP in <code>O(&radic;n)</code> steps. For <code>n = 18</code>, &radic;18 &approx; 4.2 steps, finding the key almost instantaneously.</li>
+                <li><strong>Comparison with Caesar Statistical Attack:</strong> The Caesar statistical attack exploits redundancy and frequency skew in natural language plaintext. Conversely, the toy ECC restricted key space attack exploits the <em>mathematical structure and small parameter size</em> of the group, completely independent of plaintext language or structure.</li>
+                <li><strong>Why Real ECC is Secure:</strong> Real-world secp256k1 uses a 256-bit prime group order <code>n &approx; 1.15 &times; 10<sup>77</sup></code>. Exhaustive search or BSGS would require <code>O(&radic;n) &approx; 2<sup>128</sup></code> operations—computationally infeasible with all physical energy on Earth.</li>
+            </ul>
+
+            <div class="interactive-box">
+                <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);"><i class="fa-solid fa-terminal"></i> Baby-Step Giant-Step (BSGS) Key Recovery Simulator</h3>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Target Public Key Q<sub>x</sub></label>
+                        <input type="text" id="bsgsQx" value="10">
+                    </div>
+                    <div class="control-group">
+                        <label>Target Public Key Q<sub>y</sub></label>
+                        <input type="text" id="bsgsQy" value="15">
+                    </div>
+                </div>
+                <button class="btn" onclick="runBsgsAttack()"><i class="fa-solid fa-bolt"></i> Execute BSGS Attack</button>
+                <div id="bsgsOutput" class="output-box" style="display:none;"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Tommaso Cenciotti &bull; Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+    </footer>
+
+    <script>
+        // --- Mathematical & Cryptographic Utilities for GF(17) ---
+        const P_MOD = 17;
+        const A_COEFF = 0;
+        const B_COEFF = 7;
+        const BASE_G = { x: 15, y: 13 };
+        const GROUP_ORDER = 18;
+
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        function modInverse(n, m) {
+            n = mod(n, m);
+            if (n === 0) return null;
+            for (let i = 1; i < m; i++) {
+                if (mod(n * i, m) === 1) return i;
+            }
+            return null;
+        }
+
+        function addPoints(P, Q) {
+            if (P === null) return Q;
+            if (Q === null) return P;
+            if (P.x === Q.x && mod(P.y + Q.y, P_MOD) === 0) return null;
+
+            let lambda;
+            if (P.x === Q.x && P.y === Q.y) {
+                const num = mod(3 * P.x * P.x + A_COEFF, P_MOD);
+                const den = modInverse(2 * P.y, P_MOD);
+                if (den === null) return null;
+                lambda = mod(num * den, P_MOD);
+            } else {
+                const num = mod(Q.y - P.y, P_MOD);
+                const den = modInverse(Q.x - P.x, P_MOD);
+                if (den === null) return null;
+                lambda = mod(num * den, P_MOD);
+            }
+            const xr = mod(lambda * lambda - P.x - Q.x, P_MOD);
+            const yr = mod(lambda * (P.x - xr) - P.y, P_MOD);
+            return { x: xr, y: yr };
+        }
+
+        function scalarMult(k, P) {
+            let result = null;
+            let addend = P;
+            k = BigInt(k);
+            while (k > 0n) {
+                if (k & 1n) result = addPoints(result, addend);
+                addend = addPoints(addend, addend);
+                k >>= 1n;
+            }
+            return result;
+        }
+
+        function ptToStr(P) {
+            return P === null ? 'INF' : `${P.x},${P.y}`;
+        }
+
+        function negPoint(P) {
+            if (P === null) return null;
+            return { x: P.x, y: mod(-P.y, P_MOD) };
+        }
+
+        // --- 1. EC-ElGamal Simulation ---
+        function runElGamalSimulation() {
+            const kb = parseInt(document.getElementById('elgamalKb').value, 10);
+            const msgStr = document.getElementById('elgamalMsgPoint').value.split(',');
+            const M = { x: parseInt(msgStr[0], 10), y: parseInt(msgStr[1], 10) };
+            const r = parseInt(document.getElementById('elgamalEphemeral').value, 10);
+
+            if (isNaN(kb) || isNaN(r)) {
+                alert('Please enter valid integers for private key and ephemeral scalar.');
+                return;
+            }
+
+            const Qb = scalarMult(kb, BASE_G);
+            const C1 = scalarMult(r, BASE_G);
+            const S = scalarMult(r, Qb);
+            const C2 = addPoints(M, S);
+
+            // Decryption
+            const S_prime = scalarMult(kb, C1);
+            const M_recovered = addPoints(C2, negPoint(S_prime));
+            const success = M_recovered !== null && M_recovered.x === M.x && M_recovered.y === M.y;
+
+            const out = document.getElementById('elgamalOutput');
+            out.style.display = 'block';
+            out.innerHTML = `[KEY GEN] Bob's Private Key k_B = ${kb}
+[PUBLIC KEY] Q_B = k_B * G = (${Qb.x}, ${Qb.y})
+[PLAINTEXT] M = (${M.x}, ${M.y})
+[ENCRYPTION] Ephemeral Scalar r = ${r}
+   &bull; C1 = r * G = (${C1.x}, ${C1.y})
+   &bull; Shared Secret S = r * Q_B = (${S.x}, ${S.y})
+   &bull; Ciphertext C2 = M + S = (${C2.x}, ${C2.y})
+[DECRYPTION] S' = k_B * C1 = (${S_prime.x}, ${S_prime.y})
+   &bull; Recovered M = C2 - S' = (${M_recovered ? M_recovered.x + ', ' + M_recovered.y : 'INF'})
+[VERIFICATION] Decryption Match Status: ${success ? 'SUCCESSFUL (Plaintext recovered perfectly)' : 'FAILED'}`;
+        }
+
+        // --- 2. Caesar Cipher Lab ---
+        function caesarEncrypt(text, shift) {
+            return text.toUpperCase().replace(/[A-Z]/g, c => {
+                const code = c.charCodeAt(0) - 65;
+                return String.fromCharCode(((code + shift) % 26) + 65);
+            });
+        }
+
+        function runCaesarLab() {
+            const plain = document.getElementById('caesarPlain').value;
+            const shift = parseInt(document.getElementById('caesarShift').value, 10);
+            const cipher = caesarEncrypt(plain, shift);
+            const decrypted = caesarEncrypt(cipher, 26 - (shift % 26));
+
+            const out = document.getElementById('caesarOutput');
+            out.style.display = 'block';
+            out.innerHTML = `[PLAINTEXT]  ${plain}
+[SHIFT KEY]  k = ${shift}
+[CIPHERTEXT] ${cipher}
+[DECRYPTED]  ${decrypted}`;
+        }
+
+        // --- 3. Statistical Cryptanalysis of Caesar ---
+        const ENGLISH_FREQ = {
+            'A': 0.08167, 'B': 0.01492, 'C': 0.02782, 'D': 0.04253, 'E': 0.12702,
+            'F': 0.02228, 'G': 0.02015, 'H': 0.06094, 'I': 0.06966, 'J': 0.00153,
+            'K': 0.00772, 'L': 0.04025, 'M': 0.02406, 'N': 0.06749, 'O': 0.07507,
+            'P': 0.01929, 'Q': 0.00095, 'R': 0.05987, 'S': 0.06327, 'T': 0.09056,
+            'U': 0.02758, 'V': 0.00978, 'W': 0.02360, 'X': 0.00150, 'Y': 0.01974,
+            'Z': 0.00074
+        };
+
+        const CORPUS_SAMPLES = {
+            short: "CRYPTOGRAPHY IS THE STUDY OF SECURE COMMUNICATIONS AGAINST ADVERSARIES.",
+            medium: "SAPIENZA UNIVERSITY OF ROME MASTER OF SCIENCE IN CYBERSECURITY STATISTICAL CRYPTANALYSIS LABORATORY EXAMINING SYMMETRIC AND ASYMMETRIC PRIMITIVES.",
+            long: "CRYPTOGRAPHY HAS EVOLVED FROM CLASSICAL SUBSTITUTION CIPHERS SUCH AS THE CAESAR CIPHER TO ADVANCED ELLIPTIC CURVE CRYPTOGRAPHY OPERATING OVER FINITE FIELDS. STATISTICAL CRYPTANALYSIS EXPLOITS REDUNDANCY AND KNOWN LANGUAGE LETTER FREQUENCIES TO RECOVER CIPHER KEYS WITHOUT BRUTE FORCE. IN THIS LABORATORY WE EXPLORE BOTH THE STATISTICAL VULNERABILITIES OF CLASSICAL CIPHERS AND THE MATHEMATICAL HARDNESS OF THE ELLIPTIC CURVE DISCRETE LOGARITHM PROBLEM ACROSS DIFFERENT KEY SPACES."
+        };
+
+        function updateCorpusSample() {
+            const type = document.getElementById('corpusLengthSelect').value;
+            const plain = CORPUS_SAMPLES[type];
+            const cipher = caesarEncrypt(plain, 11); // shift 11
+            document.getElementById('cryptanalysisInput').value = cipher;
+            runStatisticalCryptanalysis();
+        }
+
+        function chiSquared(text, shiftGuess) {
+            const counts = {};
+            for (let i = 0; i < 26; i++) counts[String.fromCharCode(65 + i)] = 0;
+            let n = 0;
+            for (let c of text) {
+                if (c >= 'A' && c <= 'Z') {
+                    const dec = String.fromCharCode(((c.charCodeAt(0) - 65 - shiftGuess + 26) % 26) + 65);
+                    counts[dec]++;
+                    n++;
+                }
+            }
+            if (n === 0) return Infinity;
+            let chi2 = 0;
+            for (let i = 0; i < 26; i++) {
+                const char = String.fromCharCode(65 + i);
+                const expected = n * ENGLISH_FREQ[char];
+                const diff = counts[char] - expected;
+                chi2 += (diff * diff) / expected;
+            }
+            return { chi2, counts, n };
+        }
+
+        function runStatisticalCryptanalysis() {
+            const cipherText = document.getElementById('cryptanalysisInput').value.toUpperCase();
+
+            let bestShift = 0;
+            let minChi = Infinity;
+            const chiScores = [];
+
+            for (let g = 0; g < 26; g++) {
+                const res = chiSquared(cipherText, g);
+                chiScores.push(res.chi2);
+                if (res.chi2 < minChi) {
+                    minChi = res.chi2;
+                    bestShift = g;
+                }
+            }
+
+            const recoveredPlain = caesarEncrypt(cipherText, 26 - bestShift);
+            const bestRes = chiSquared(cipherText, bestShift);
+
+            const out = document.getElementById('cryptanalysisResult');
+            out.style.display = 'block';
+            out.innerHTML = `[STATISTICAL ATTACK RESULTS]
+&bull; Estimated Key Shift: k = ${bestShift} (Minimum Chi-Squared = ${minChi.toFixed(2)})
+&bull; Recovered Plaintext:
+${recoveredPlain}`;
+
+            drawFrequencyChart(bestRes.counts, bestRes.n);
+            drawChiChart(chiScores);
+        }
+
+        // --- Canvas Charts using Design System / Palette Guidelines ---
+        function drawFrequencyChart(counts, n) {
+            const canvas = document.getElementById('freqChart');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const padLeft = 45, padBottom = 35, padTop = 20, padRight = 15;
+            const plotW = W - padLeft - padRight;
+            const plotH = H - padTop - padBottom;
+
+            // Background & Grid
+            ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, padTop);
+            ctx.lineTo(padLeft, padTop + plotH);
+            ctx.lineTo(padLeft + plotW, padTop + plotH);
+            ctx.stroke();
+
+            // Find max frequency for scaling
+            let maxVal = 0.15; // max expected prob
+            for (let i = 0; i < 26; i++) {
+                const char = String.fromCharCode(65 + i);
+                const obs = n > 0 ? (counts[char] / n) : 0;
+                if (obs > maxVal) maxVal = obs;
+                if (ENGLISH_FREQ[char] > maxVal) maxVal = ENGLISH_FREQ[char];
+            }
+
+            const barW = plotW / 26;
+
+            for (let i = 0; i < 26; i++) {
+                const char = String.fromCharCode(65 + i);
+                const obs = n > 0 ? (counts[char] / n) : 0;
+                const exp = ENGLISH_FREQ[char];
+
+                const x = padLeft + i * barW;
+
+                // Expected marker (line or dot)
+                const expH = (exp / maxVal) * plotH;
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.5)';
+                ctx.fillRect(x + 2, padTop + plotH - expH, barW - 4, 2);
+
+                // Observed bar
+                const obsH = (obs / maxVal) * plotH;
+                ctx.fillStyle = '#06b6d4';
+                ctx.fillRect(x + 3, padTop + plotH - obsH, barW - 6, obsH);
+
+                // X label
+                if (i % 2 === 0) {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '10px JetBrains Mono';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(char, x + barW / 2, padTop + plotH + 15);
+                }
+            }
+
+            // Legend
+            ctx.fillStyle = '#06b6d4';
+            ctx.fillRect(W - 140, 10, 10, 10);
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillText('Observed', W - 125, 19);
+
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.7)';
+            ctx.fillRect(W - 75, 10, 10, 10);
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillText('Expected', W - 60, 19);
+        }
+
+        function drawChiChart(chiScores) {
+            const canvas = document.getElementById('chiChart');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const padLeft = 50, padBottom = 35, padTop = 20, padRight = 15;
+            const plotW = W - padLeft - padRight;
+            const plotH = H - padTop - padBottom;
+
+            ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, padTop);
+            ctx.lineTo(padLeft, padTop + plotH);
+            ctx.lineTo(padLeft + plotW, padTop + plotH);
+            ctx.stroke();
+
+            const maxChi = Math.max(...chiScores, 100);
+            const barW = plotW / 26;
+
+            let minIdx = 0;
+            for (let i = 0; i < 26; i++) {
+                if (chiScores[i] < chiScores[minIdx]) minIdx = i;
+            }
+
+            for (let i = 0; i < 26; i++) {
+                const val = chiScores[i];
+                const x = padLeft + i * barW;
+                const h = (val / maxChi) * plotH;
+
+                ctx.fillStyle = (i === minIdx) ? '#10b981' : '#3b82f6';
+                ctx.fillRect(x + 2, padTop + plotH - h, barW - 4, h);
+
+                if (i % 2 === 0) {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '10px JetBrains Mono';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(i, x + barW / 2, padTop + plotH + 15);
+                }
+            }
+
+            // Legend
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(W - 140, 10, 10, 10);
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillText('Min Chi2 (Key)', W - 125, 19);
+        }
+
+        // --- 4. Baby-Step Giant-Step Attack ---
+        function runBsgsAttack() {
+            const qx = parseInt(document.getElementById('bsgsQx').value, 10);
+            const qy = parseInt(document.getElementById('bsgsQy').value, 10);
+            const Q = { x: qx, y: qy };
+
+            const startTime = performance.now();
+            const m = Math.ceil(Math.sqrt(GROUP_ORDER));
+            const table = new Map();
+
+            let cur = null;
+            for (let j = 0; j < m; j++) {
+                table.set(ptToStr(cur), j);
+                cur = addPoints(cur, BASE_G);
+            }
+
+            const mG = scalarMult(m, BASE_G);
+            let giant = null;
+            let foundKey = null;
+            let steps = 0;
+
+            for (let i = 1; i <= m + 1; i++) {
+                giant = addPoints(giant, mG);
+                steps++;
+                // Check Q + i*m*G = j*G  => Q = j*G - i*m*G
+                // Or standard BSGS: giant matches table entry
+                const key = ptToStr(giant);
+                // Let's test standard meet-in-the-middle: Q + jG = i*mG
+                // Actually let's use the verified BSGS loop from testing:
+            }
+
+            // Robust BSGS Implementation
+            function solveBsgs(targetQ) {
+                const tableBsgs = new Map();
+                let curr = targetQ;
+                for (let j = 0; j < m; j++) {
+                    tableBsgs.set(ptToStr(curr), j);
+                    curr = addPoints(curr, BASE_G);
+                }
+                const mG_pt = scalarMult(m, BASE_G);
+                let giantPt = null;
+                for (let i = 1; i <= m + 1; i++) {
+                    giantPt = addPoints(giantPt, mG_pt);
+                    const kStr = ptToStr(giantPt);
+                    if (tableBsgs.has(kStr)) {
+                        const j = tableBsgs.get(kStr);
+                        let k = i * m - j;
+                        k = ((k % GROUP_ORDER) + GROUP_ORDER) % GROUP_ORDER;
+                        return { k, steps: i };
+                    }
+                }
+                return null;
+            }
+
+            const res = solveBsgs(Q);
+            const endTime = performance.now();
+
+            const out = document.getElementById('bsgsOutput');
+            out.style.display = 'block';
+            if (res && res.k !== null) {
+                out.innerHTML = `[BABY-STEP GIANT-STEP SUCCESS]
+&bull; Target Public Key Q = (${qx}, ${qy})
+&bull; Recovered Private Key k = ${res.k}
+&bull; Verification: ${res.k} * G = (${scalarMult(res.k, BASE_G).x}, ${scalarMult(res.k, BASE_G).y})
+&bull; Algorithm Complexity: m = ${m}, Steps = ${res.steps}
+&bull; Computation Time: ${(endTime - startTime).toFixed(3)} ms`;
+            } else {
+                out.innerHTML = `[ATTACK FAILED] Point Q is not in the subgroup generated by G = (15, 13) or invalid coordinates.`;
+            }
+        }
+
+        // Run initializations on load
+        window.addEventListener('DOMContentLoaded', () => {
+            runElGamalSimulation();
+            runCaesarLab();
+            updateCorpusSample();
+        });
+    </script>
+</body>
+</html>
