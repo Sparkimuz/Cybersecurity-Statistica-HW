@@ -931,17 +931,17 @@ ${recoveredPlain}`;
                 }
             }
 
-            ctx.fillStyle = '#06b6d4';
-            ctx.fillRect(W - 140, 10, 10, 10);
-            ctx.fillStyle = '#f8fafc';
+            ctx.fillStyle = '#32B872'; // Verde menta, uguale alle barre Observed
+            ctx.fillRect(W - 150, 12, 10, 10);
+            ctx.fillStyle = '#E2ECE7';
             ctx.font = '10px Inter';
             ctx.textAlign = 'left';
-            ctx.fillText('Observed', W - 125, 19);
+            ctx.fillText('Observed', W - 135, 20);
 
-            ctx.fillStyle = '#32B872';
-            ctx.fillRect(W - 75, 10, 10, 10);
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillText('Expected', W - 60, 19);
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.7)'; // Grigio, uguale ai trattini Expected
+            ctx.fillRect(W - 75, 12, 10, 2); // Disegna un trattino per coerenza con il grafico
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText('Expected', W - 60, 20);
         }
 
         function drawChiChart(chiScores) {
