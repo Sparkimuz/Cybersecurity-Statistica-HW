@@ -291,16 +291,20 @@
         }
 
         .output-box {
-            background: rgba(9, 13, 22, 0.95);
+            background: #0e1611;
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 1.15rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.84rem;
-            color: #38bdf8;
+            color: var(--text-main); /* Testo chiaro menta #E2ECE7 */
             margin-top: 1rem;
             word-break: break-all;
             white-space: pre-wrap;
+        }
+
+        .output-box strong, .output-box b {
+            color: var(--accent-primary);
         }
 
         .charts-grid {
@@ -884,7 +888,7 @@ ${recoveredPlain}`;
             const plotW = W - padLeft - padRight;
             const plotH = H - padTop - padBottom;
 
-            ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+            ctx.fillStyle = '#141F19';
             ctx.fillRect(0, 0, W, H);
 
             ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
@@ -916,7 +920,7 @@ ${recoveredPlain}`;
                 ctx.fillRect(x + 2, padTop + plotH - expH, barW - 4, 2);
 
                 const obsH = (obs / maxVal) * plotH;
-                ctx.fillStyle = '#06b6d4';
+                ctx.fillStyle = '#32B872';
                 ctx.fillRect(x + 3, padTop + plotH - obsH, barW - 6, obsH);
 
                 if (i % 2 === 0) {
@@ -950,7 +954,7 @@ ${recoveredPlain}`;
             const plotW = W - padLeft - padRight;
             const plotH = H - padTop - padBottom;
 
-            ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
+            ctx.fillStyle = '#141F19';
             ctx.fillRect(0, 0, W, H);
 
             ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
@@ -974,7 +978,7 @@ ${recoveredPlain}`;
                 const x = padLeft + i * barW;
                 const h = (val / maxChi) * plotH;
 
-                ctx.fillStyle = (i === minIdx) ? '#10b981' : '#3b82f6';
+                ctx.fillStyle = (i === minIdx) ? '#32B872' : 'rgba(50, 184, 114, 0.35)';
                 ctx.fillRect(x + 2, padTop + plotH - h, barW - 4, h);
 
                 if (i % 2 === 0) {
