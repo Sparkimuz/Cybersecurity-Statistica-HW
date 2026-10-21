@@ -6,20 +6,22 @@
     <title>Tommaso Cenciotti — Statistics in Cybersecurity</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
-            --bg-main: #090d16;
-            --bg-card: rgba(17, 24, 39, 0.8);
-            --bg-card-hover: rgba(30, 41, 59, 0.95);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent-cyan: #06b6d4;
-            --accent-blue: #3b82f6;
-            --accent-purple: #8b5cf6;
+            --bg-main: #f4f7f6;
+            --bg-card: #ffffff;
+            --bg-card-hover: #fcfdfd;
+            --text-main: #1a2521;
+            --text-muted: #52665e;
+            --accent-primary: #007d44;
+            --accent-secondary: #32b872;
+            --accent-cyan: #059669;
+            --accent-blue: #0284c7;
+            --accent-purple: #7c3aed;
             --accent-emerald: #10b981;
-            --border-color: rgba(51, 65, 85, 0.65);
-            --border-glow: rgba(6, 182, 212, 0.5);
+            --border-color: #d1e0d8;
+            --border-glow: rgba(0, 125, 68, 0.2);
         }
 
         * {
@@ -36,11 +38,11 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
-                radial-gradient(circle at 85% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(0, 125, 68, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 85% 25%, rgba(50, 184, 114, 0.05) 0%, transparent 45%),
+                linear-gradient(rgba(0, 125, 68, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 125, 68, 0.03) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
         }
 
@@ -54,7 +56,7 @@
             padding: 4rem 2rem 2.75rem;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
-            background: rgba(9, 13, 22, 0.8);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(16px);
         }
 
@@ -66,11 +68,11 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: var(--text-muted);
+            color: var(--accent-primary);
             margin-bottom: 1rem;
             padding: 0.35rem 0.9rem;
             border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.03);
+            background: #e6f1ec;
             border: 1px solid var(--border-color);
         }
 
@@ -79,7 +81,7 @@
             font-weight: 700;
             letter-spacing: -0.04em;
             margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #ffffff 0%, var(--accent-cyan) 55%, var(--accent-blue) 100%);
+            background: linear-gradient(135deg, var(--text-main) 0%, var(--accent-primary) 55%, var(--accent-secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: block;
@@ -105,16 +107,23 @@
             align-items: center;
             gap: 0.55rem;
             padding: 0.45rem 1rem;
-            background: rgba(30, 41, 59, 0.65);
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 9999px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.78rem;
             color: var(--text-main);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+        }
+
+        .meta-pill:hover {
+            border-color: var(--accent-primary);
+            background: #f0f7f3;
         }
 
         .meta-pill i {
-            color: var(--accent-cyan);
+            color: var(--accent-primary);
         }
 
         /* Main Content & Grid */
@@ -145,7 +154,7 @@
         }
 
         .section-title i {
-            color: var(--accent-cyan);
+            color: var(--accent-primary);
         }
 
         .section-subtitle {
@@ -164,7 +173,6 @@
         /* Cards */
         .card {
             background-color: var(--bg-card);
-            backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 1.75rem;
@@ -174,6 +182,7 @@
             position: relative;
             overflow: hidden;
             transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         }
 
         .card::before {
@@ -183,7 +192,7 @@
             left: 0;
             width: 100%;
             height: 3px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-emerald));
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -191,8 +200,8 @@
         .card.active:hover {
             transform: translateY(-5px);
             background-color: var(--bg-card-hover);
-            border-color: var(--border-glow);
-            box-shadow: 0 16px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.12);
+            border-color: var(--accent-primary);
+            box-shadow: 0 12px 28px -8px rgba(0, 125, 68, 0.12), 0 0 1px rgba(0, 125, 68, 0.1);
         }
 
         .card.active:hover::before {
@@ -218,14 +227,15 @@
             font-weight: 700;
             padding: 0.25rem 0.65rem;
             border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
+            background: #f0f5f2;
             color: var(--text-muted);
+            border: 1px solid #d8e2dc;
         }
 
         .card.active .hw-badge {
-            background: rgba(6, 182, 212, 0.12);
-            color: var(--accent-cyan);
-            border: 1px solid rgba(6, 182, 212, 0.25);
+            background: #e6f4ed;
+            color: var(--accent-primary);
+            border: 1px solid rgba(0, 125, 68, 0.15);
         }
 
         .status-pill {
@@ -234,9 +244,9 @@
             gap: 0.35rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.68rem;
-            color: var(--accent-emerald);
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--accent-primary);
+            background: #e6f4ed;
+            border: 1px solid rgba(0, 125, 68, 0.2);
             padding: 0.2rem 0.55rem;
             border-radius: 9999px;
         }
@@ -245,15 +255,15 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background-color: var(--accent-emerald);
-            box-shadow: 0 0 6px var(--accent-emerald);
+            background-color: var(--accent-secondary);
+            box-shadow: 0 0 4px var(--accent-secondary);
         }
 
         .card-icon {
             width: 36px;
             height: 36px;
             border-radius: 9px;
-            background: rgba(255, 255, 255, 0.03);
+            background: #f8faf9;
             border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -264,9 +274,9 @@
         }
 
         .card.active:hover .card-icon {
-            color: var(--accent-cyan);
-            border-color: rgba(6, 182, 212, 0.35);
-            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-primary);
+            border-color: rgba(0, 125, 68, 0.25);
+            background: #e6f4ed;
         }
 
         .card-title {
@@ -286,11 +296,11 @@
         .card-desc code {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.82rem;
-            color: #e2e8f0;
-            background: rgba(15, 23, 42, 0.7);
+            color: var(--accent-primary);
+            background: #f0f7f3;
             padding: 0.1rem 0.35rem;
             border-radius: 4px;
-            border: 1px solid rgba(51, 65, 85, 0.5);
+            border: 1px solid #d1e0d8;
         }
 
         .topic-tags {
@@ -305,9 +315,9 @@
             font-size: 0.68rem;
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
-            background: rgba(15, 23, 42, 0.85);
+            background: #f8faf9;
             border: 1px solid var(--border-color);
-            color: #cbd5e1;
+            color: var(--text-muted);
         }
 
         .card-footer {
@@ -315,11 +325,11 @@
             justify-content: space-between;
             align-items: center;
             padding-top: 0.9rem;
-            border-top: 1px solid rgba(51, 65, 85, 0.45);
+            border-top: 1px solid var(--border-color);
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.78rem;
-            color: var(--accent-cyan);
-            font-weight: 500;
+            color: var(--accent-primary);
+            font-weight: 600;
         }
 
         .card.active .arrow-icon {
@@ -332,10 +342,10 @@
 
         /* Locked State */
         .card.locked {
-            opacity: 0.55;
+            opacity: 0.6;
             cursor: not-allowed;
             border-style: dashed;
-            background: rgba(15, 23, 42, 0.45);
+            background: #fcfdfd;
         }
 
         .card.locked .hw-badge {
@@ -354,7 +364,7 @@
             border-top: 1px solid var(--border-color);
             color: var(--text-muted);
             font-size: 0.85rem;
-            background: rgba(9, 13, 22, 0.9);
+            background: #ffffff;
         }
 
         .social-links {
@@ -378,9 +388,9 @@
         }
 
         .social-links a:hover {
-            color: var(--accent-cyan);
-            border-color: var(--accent-cyan);
-            background: rgba(6, 182, 212, 0.08);
+            color: var(--accent-primary);
+            border-color: var(--accent-primary);
+            background: #f0f7f3;
         }
 
         @media (max-width: 1024px) {
@@ -438,7 +448,7 @@
         </div>
 
         <div class="grid-container">
-            
+
             <!-- HW 1 -->
             <a href="hw1.html" class="card active">
                 <div>
