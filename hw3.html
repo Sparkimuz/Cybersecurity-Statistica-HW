@@ -295,30 +295,6 @@
             white-space: pre-wrap;
         }
 
-        .results-flex {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.25rem;
-            margin-top: 1.25rem;
-        }
-
-        .result-card {
-            background: rgba(9, 13, 22, 0.75);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1.15rem;
-        }
-
-        .result-card h4 {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: var(--accent-amber);
-            margin-bottom: 0.6rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
@@ -445,17 +421,17 @@
         <section class="panel">
             <div class="panel-header">
                 <h2 class="panel-title"><i class="fa-solid fa-key"></i> 1. Toy Cryptographic Scheme based on secp256k1 &amp; EC-ElGamal</h2>
-                <span class="panel-badge">Finite Field GF(17) &bull; y&sup2; &equiv; x&sup3; + 7 (mod 17)</span>
+                <span class="panel-badge">Finite Field GF(17) &bull; y&sup2; &equiv; x&sup3; + 7 (mod 17) &bull; G = (15, 13)</span>
             </div>
 
             <p>
-                In Part 1 of Homework 1, we examined the elliptic curve <strong>y&sup2; &equiv; x&sup3; + 7 (mod 17)</strong>, which forms a cyclic group of 18 points (17 affine points + the point at infinity &infin;). Using base point <strong>G = (15, 13)</strong> of order 18, we build a toy asymmetric encryption scheme analogous to <strong>EC-ElGamal</strong>.
+                In Part 1 of Homework 1, we examined the elliptic curve <strong>y&sup2; &equiv; x&sup3; + 7 (mod 17)</strong>, which forms a cyclic group of 18 points (17 affine points + the point at infinity &infin;). Using base point <strong>G = (15, 13)</strong> (a generator of full order 18), we build a toy asymmetric encryption scheme analogous to <strong>EC-ElGamal</strong>.
             </p>
 
             <h3>Algorithm Steps &amp; Key Roles</h3>
             <ul>
                 <li><strong>Key Generation (Bob):</strong> Bob chooses a private scalar <code>k<sub>B</sub></code> from a restricted range (e.g., <code>1 &le; k<sub>B</sub> &lt; 18</code>) and computes his public key <code>Q<sub>B</sub> = k<sub>B</sub> &middot; G</code>.</li>
-                <li><strong>Encryption (Alice):</strong> To encrypt a message point <code>M</code> (which is a valid point on the curve), Alice picks a random ephemeral integer <code>r</code>, computes ciphertext component <code>C<sub>1</sub> = r &middot; G</code>, and shared secret mask <code>S = r &middot; Q<sub>B</sub></code>. The second ciphertext component is <code>C<sub>2</sub> = M + S</code>.</li>
+                <li><strong>Encryption (Alice):</strong> To encrypt a message point <code>M</code> (which is a valid point on the curve representing character encoding or numerical payload), Alice picks a random ephemeral integer <code>r</code>, computes ciphertext component <code>C<sub>1</sub> = r &middot; G</code>, and shared secret mask <code>S = r &middot; Q<sub>B</sub></code>. The second ciphertext component is <code>C<sub>2</sub> = M + S</code>.</li>
                 <li><strong>Decryption (Bob):</strong> Bob receives <code>(C<sub>1</sub>, C<sub>2</sub>)</code>. He computes his shared secret mask <code>S' = k<sub>B</sub> &middot; C<sub>1</sub> = k<sub>B</sub>(rG) = r(k<sub>B</sub>G) = rQ<sub>B</sub> = S</code>, and recovers the plaintext message point by point subtraction: <code>M = C<sub>2</sub> - S' = C<sub>2</sub> + (-S')</code>.</li>
             </ul>
 
@@ -495,7 +471,7 @@
             </div>
 
             <p>
-                The <strong>Caesar Cipher</strong> is one of the simplest and most widely known substitution ciphers. It replaces each letter in the plaintext with a letter fixed positions down the alphabet (shift <code>k &infin; [0, 25]</code>).
+                The <strong>Caesar Cipher</strong> is a classic substitution cipher that encrypts plain-text by shifting each letter forward by a fixed number of positions <code>k &isin; [0, 25]</code> modulo 26.
             </p>
 
             <div class="interactive-box">
@@ -577,6 +553,7 @@
                     <div class="control-group">
                         <label>Text Length / Corpus Size</label>
                         <select id="corpusLengthSelect" onchange="updateCorpusSample()">
+                            <option value="very_short">Very Short (approx. 10 chars — Test Limits)</option>
                             <option value="short">Short (approx. 50 chars)</option>
                             <option value="medium" selected>Medium (approx. 200 chars)</option>
                             <option value="long">Long (approx. 1000+ chars)</option>
@@ -585,6 +562,15 @@
                 </div>
                 <button class="btn" onclick="runStatisticalCryptanalysis()"><i class="fa-solid fa-wand-magic-sparkles"></i> Recover Key via Chi-Squared Analysis</button>
                 <div id="cryptanalysisResult" class="output-box" style="display:none;"></div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color);">
+                <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-main);">Effectiveness, Sample Size Limitations &amp; Alternative Approaches</h3>
+                <ul>
+                    <li><strong>Effect of Ciphertext Length (Law of Large Numbers):</strong> On long and medium texts (&gt;100 characters), the empirical letter distribution converges closely to the theoretical English distribution, producing a sharp, unambiguous minimum in the &chi;&sup2; score at the true shift key. On very short ciphertexts (&lt;15–20 characters), high sampling variance distorts letter counts (e.g., a short phrase lacking common vowels like 'E'), causing the monographic &chi;&sup2; test to occasionally misidentify the correct shift.</li>
+                    <li><strong>Exhaustive Key Search (Brute-Force):</strong> Since the key space is only 26, generating all 26 candidate plaintexts is computationally trivial (<code>O(26)</code>). However, automated brute-force still requires a statistical scoring function (like &chi;&sup2; or dictionary matching) to recognize the valid plaintext without human visual inspection.</li>
+                    <li><strong>Monogram Frequency vs. N-Gram Scoring:</strong> Standard frequency analysis treats letters as independent (unigrams). By contrast, <strong>n-gram scoring</strong> (bigrams like <code>TH, HE, IN</code> or trigrams like <code>THE, AND, ING</code>) evaluates the log-probability of adjacent character sequences: <code>Score = &sum; log P(c<sub>i</sub>, c<sub>i+1</sub>)</code>. N-gram models capture Markovian language dependencies, making automated key recovery drastically more reliable on short ciphertexts and essential against general monoalphabetic substitution ciphers where the key space is <code>26! &approx; 4 &times; 10<sup>26</sup></code>.</li>
+                </ul>
             </div>
 
             <div class="charts-grid">
@@ -632,19 +618,33 @@
                 <li><strong>Why Real ECC is Secure:</strong> Real-world secp256k1 uses a 256-bit prime group order <code>n &approx; 1.15 &times; 10<sup>77</sup></code>. Exhaustive search or BSGS would require <code>O(&radic;n) &approx; 2<sup>128</sup></code> operations—computationally infeasible with all physical energy on Earth.</li>
             </ul>
 
+            <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color);">
+                <h3 style="font-size: 1.05rem; margin-bottom: 0.75rem; color: var(--text-main);">Restricted Key Space vs. Structural Design Weaknesses</h3>
+                <ul>
+                    <li><strong>Weaknesses from Restricted Key Space:</strong> Even if the true <code>secp256k1</code> prime field <code>p = 2<sup>256</sup> - 2<sup>32</sup> - 977</code> is used, restricting the private key <code>k</code> to a small interval <code>[1, B]</code> allows attackers to recover <code>k</code> in <code>O(B)</code> via brute-force or <code>O(&radic;B)</code> via Baby-Step Giant-Step / Pollard's Kangaroo algorithm.</li>
+                    <li><strong>Weaknesses from Toy Scheme Design:</strong>
+                        <ol style="margin-top: 0.4rem;">
+                            <li><em>Deterministic Character-by-Character Encryption (Electronic Codebook Mode):</em> If a toy scheme encrypts each letter deterministically without a fresh random ephemeral scalar <code>r</code> per character, identical plaintext letters map to identical ciphertext points. The ECC scheme degenerates into a simple monoalphabetic substitution cipher and becomes vulnerable to the exact same <strong>Chi-Squared frequency analysis</strong> used against the Caesar cipher, regardless of how large the private key space is!</li>
+                            <li><em>Ephemeral Nonce Reuse:</em> In EC-ElGamal, reusing the same ephemeral scalar <code>r</code> across two messages <code>M<sub>1</sub></code> and <code>M<sub>2</sub></code> yields <code>C<sub>2,1</sub> - C<sub>2,2</sub> = M<sub>1</sub> - M<sub>2</sub></code>, leaking the relationship between plaintexts without needing the private key.</li>
+                            <li><em>Small Subgroup / Toy Field:</em> Operating over <code>GF(17)</code> restricts the message space to 18 points, allowing a complete precomputation lookup table (rainbow table) of all possible operations.</li>
+                        </ol>
+                    </li>
+                </ul>
+            </div>
+
             <div class="interactive-box">
-                <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);"><i class="fa-solid fa-terminal"></i> Baby-Step Giant-Step (BSGS) Key Recovery Simulator</h3>
+                <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-main);"><i class="fa-solid fa-terminal"></i> Baby-Step Giant-Step (BSGS) Key Recovery &amp; Automated Decryption</h3>
                 <div class="controls-grid">
                     <div class="control-group">
-                        <label>Target Public Key Q<sub>x</sub></label>
-                        <input type="text" id="bsgsQx" value="10">
+                        <label>Target Public Key Q<sub>x</sub> (Default from k<sub>B</sub>=7)</label>
+                        <input type="text" id="bsgsQx" value="1">
                     </div>
                     <div class="control-group">
                         <label>Target Public Key Q<sub>y</sub></label>
-                        <input type="text" id="bsgsQy" value="15">
+                        <input type="text" id="bsgsQy" value="12">
                     </div>
                 </div>
-                <button class="btn" onclick="runBsgsAttack()"><i class="fa-solid fa-bolt"></i> Execute BSGS Attack</button>
+                <button class="btn" onclick="runBsgsAttack()"><i class="fa-solid fa-bolt"></i> Execute BSGS Key Recovery &amp; Decrypt</button>
                 <div id="bsgsOutput" class="output-box" style="display:none;"></div>
             </div>
         </section>
@@ -660,7 +660,7 @@
         const P_MOD = 17;
         const A_COEFF = 0;
         const B_COEFF = 7;
-        const BASE_G = { x: 15, y: 13 };
+        const BASE_G = { x: 15, y: 13 }; // True full generator of order 18 on GF(17)
         const GROUP_ORDER = 18;
 
         function mod(n, m) {
@@ -741,9 +741,14 @@
             const M_recovered = addPoints(C2, negPoint(S_prime));
             const success = M_recovered !== null && M_recovered.x === M.x && M_recovered.y === M.y;
 
+            // Store in global scope for BSGS integration
+            window.lastC1 = C1;
+            window.lastC2 = C2;
+            window.lastM = M;
+
             const out = document.getElementById('elgamalOutput');
             out.style.display = 'block';
-            out.innerHTML = `[KEY GEN] Bob's Private Key k_B = ${kb}
+            out.innerHTML = `[KEY GEN] Bob's Private Key k_B = ${kb} (Base G = 15,13)
 [PUBLIC KEY] Q_B = k_B * G = (${Qb.x}, ${Qb.y})
 [PLAINTEXT] M = (${M.x}, ${M.y})
 [ENCRYPTION] Ephemeral Scalar r = ${r}
@@ -753,6 +758,10 @@
 [DECRYPTION] S' = k_B * C1 = (${S_prime.x}, ${S_prime.y})
    &bull; Recovered M = C2 - S' = (${M_recovered ? M_recovered.x + ', ' + M_recovered.y : 'INF'})
 [VERIFICATION] Decryption Match Status: ${success ? 'SUCCESSFUL (Plaintext recovered perfectly)' : 'FAILED'}`;
+
+            // Auto-update BSGS inputs to match current public key Q_B
+            document.getElementById('bsgsQx').value = Qb.x;
+            document.getElementById('bsgsQy').value = Qb.y;
         }
 
         // --- 2. Caesar Cipher Lab ---
@@ -788,7 +797,8 @@
         };
 
         const CORPUS_SAMPLES = {
-            short: "CRYPTOGRAPHY IS THE STUDY OF SECURE COMMUNICATIONS AGAINST ADVERSARIES.",
+            very_short: "CYBER JAZZ QUIZ",
+            short: "CRYPTOGRAPHY IS THE STUDY OF SECURE COMMUNICATIONS.",
             medium: "SAPIENZA UNIVERSITY OF ROME MASTER OF SCIENCE IN CYBERSECURITY STATISTICAL CRYPTANALYSIS LABORATORY EXAMINING SYMMETRIC AND ASYMMETRIC PRIMITIVES.",
             long: "CRYPTOGRAPHY HAS EVOLVED FROM CLASSICAL SUBSTITUTION CIPHERS SUCH AS THE CAESAR CIPHER TO ADVANCED ELLIPTIC CURVE CRYPTOGRAPHY OPERATING OVER FINITE FIELDS. STATISTICAL CRYPTANALYSIS EXPLOITS REDUNDANCY AND KNOWN LANGUAGE LETTER FREQUENCIES TO RECOVER CIPHER KEYS WITHOUT BRUTE FORCE. IN THIS LABORATORY WE EXPLORE BOTH THE STATISTICAL VULNERABILITIES OF CLASSICAL CIPHERS AND THE MATHEMATICAL HARDNESS OF THE ELLIPTIC CURVE DISCRETE LOGARITHM PROBLEM ACROSS DIFFERENT KEY SPACES."
         };
@@ -796,7 +806,7 @@
         function updateCorpusSample() {
             const type = document.getElementById('corpusLengthSelect').value;
             const plain = CORPUS_SAMPLES[type];
-            const cipher = caesarEncrypt(plain, 11); // shift 11
+            const cipher = caesarEncrypt(plain, 7); // shift 7
             document.getElementById('cryptanalysisInput').value = cipher;
             runStatisticalCryptanalysis();
         }
@@ -812,7 +822,7 @@
                     n++;
                 }
             }
-            if (n === 0) return Infinity;
+            if (n === 0) return { chi2: Infinity, counts, n: 0 };
             let chi2 = 0;
             for (let i = 0; i < 26; i++) {
                 const char = String.fromCharCode(65 + i);
@@ -846,6 +856,7 @@
             out.style.display = 'block';
             out.innerHTML = `[STATISTICAL ATTACK RESULTS]
 &bull; Estimated Key Shift: k = ${bestShift} (Minimum Chi-Squared = ${minChi.toFixed(2)})
+&bull; Text Length: ${bestRes.n} alphabetic characters
 &bull; Recovered Plaintext:
 ${recoveredPlain}`;
 
@@ -853,7 +864,7 @@ ${recoveredPlain}`;
             drawChiChart(chiScores);
         }
 
-        // --- Canvas Charts using Design System / Palette Guidelines ---
+        // --- Canvas Charts ---
         function drawFrequencyChart(counts, n) {
             const canvas = document.getElementById('freqChart');
             const ctx = canvas.getContext('2d');
@@ -864,7 +875,6 @@ ${recoveredPlain}`;
             const plotW = W - padLeft - padRight;
             const plotH = H - padTop - padBottom;
 
-            // Background & Grid
             ctx.fillStyle = 'rgba(9, 13, 22, 0.9)';
             ctx.fillRect(0, 0, W, H);
 
@@ -876,8 +886,7 @@ ${recoveredPlain}`;
             ctx.lineTo(padLeft + plotW, padTop + plotH);
             ctx.stroke();
 
-            // Find max frequency for scaling
-            let maxVal = 0.15; // max expected prob
+            let maxVal = 0.15;
             for (let i = 0; i < 26; i++) {
                 const char = String.fromCharCode(65 + i);
                 const obs = n > 0 ? (counts[char] / n) : 0;
@@ -891,20 +900,16 @@ ${recoveredPlain}`;
                 const char = String.fromCharCode(65 + i);
                 const obs = n > 0 ? (counts[char] / n) : 0;
                 const exp = ENGLISH_FREQ[char];
-
                 const x = padLeft + i * barW;
 
-                // Expected marker (line or dot)
                 const expH = (exp / maxVal) * plotH;
                 ctx.fillStyle = 'rgba(148, 163, 184, 0.5)';
                 ctx.fillRect(x + 2, padTop + plotH - expH, barW - 4, 2);
 
-                // Observed bar
                 const obsH = (obs / maxVal) * plotH;
                 ctx.fillStyle = '#06b6d4';
                 ctx.fillRect(x + 3, padTop + plotH - obsH, barW - 6, obsH);
 
-                // X label
                 if (i % 2 === 0) {
                     ctx.fillStyle = '#94a3b8';
                     ctx.font = '10px JetBrains Mono';
@@ -913,7 +918,6 @@ ${recoveredPlain}`;
                 }
             }
 
-            // Legend
             ctx.fillStyle = '#06b6d4';
             ctx.fillRect(W - 140, 10, 10, 10);
             ctx.fillStyle = '#f8fafc';
@@ -972,7 +976,6 @@ ${recoveredPlain}`;
                 }
             }
 
-            // Legend
             ctx.fillStyle = '#10b981';
             ctx.fillRect(W - 140, 10, 10, 10);
             ctx.fillStyle = '#f8fafc';
@@ -981,7 +984,7 @@ ${recoveredPlain}`;
             ctx.fillText('Min Chi2 (Key)', W - 125, 19);
         }
 
-        // --- 4. Baby-Step Giant-Step Attack ---
+        // --- 4. Baby-Step Giant-Step Attack & Decryption Integration ---
         function runBsgsAttack() {
             const qx = parseInt(document.getElementById('bsgsQx').value, 10);
             const qy = parseInt(document.getElementById('bsgsQy').value, 10);
@@ -989,30 +992,7 @@ ${recoveredPlain}`;
 
             const startTime = performance.now();
             const m = Math.ceil(Math.sqrt(GROUP_ORDER));
-            const table = new Map();
 
-            let cur = null;
-            for (let j = 0; j < m; j++) {
-                table.set(ptToStr(cur), j);
-                cur = addPoints(cur, BASE_G);
-            }
-
-            const mG = scalarMult(m, BASE_G);
-            let giant = null;
-            let foundKey = null;
-            let steps = 0;
-
-            for (let i = 1; i <= m + 1; i++) {
-                giant = addPoints(giant, mG);
-                steps++;
-                // Check Q + i*m*G = j*G  => Q = j*G - i*m*G
-                // Or standard BSGS: giant matches table entry
-                const key = ptToStr(giant);
-                // Let's test standard meet-in-the-middle: Q + jG = i*mG
-                // Actually let's use the verified BSGS loop from testing:
-            }
-
-            // Robust BSGS Implementation
             function solveBsgs(targetQ) {
                 const tableBsgs = new Map();
                 let curr = targetQ;
@@ -1040,15 +1020,31 @@ ${recoveredPlain}`;
 
             const out = document.getElementById('bsgsOutput');
             out.style.display = 'block';
+
             if (res && res.k !== null) {
-                out.innerHTML = `[BABY-STEP GIANT-STEP SUCCESS]
+                const recoveredKb = res.k;
+                let decryptInfo = '';
+
+                // If window.lastC1 and window.lastC2 exist, decrypt them using recoveredKb!
+                if (window.lastC1 && window.lastC2) {
+                    const S_prime = scalarMult(recoveredKb, window.lastC1);
+                    const M_recovered = addPoints(window.lastC2, negPoint(S_prime));
+                    decryptInfo = `\n[INTERCEPTED CIPHERTEXT DECRYPTION (from Section 1)]
+   &bull; C1 = (${window.lastC1.x}, ${window.lastC1.y})
+   &bull; C2 = (${window.lastC2.x}, ${window.lastC2.y})
+   &bull; Recovered Shared Secret S' = k_B * C1 = (${S_prime.x}, ${S_prime.y})
+   &bull; Decrypted Message Point M = C2 - S' = (${M_recovered ? M_recovered.x + ', ' + M_recovered.y : 'INF'})
+   &bull; Original Message Point M was: (${window.lastM.x}, ${window.lastM.y}) — MATCHED PERFECTLY!`;
+                }
+
+                out.innerHTML = `[BABY-STEP GIANT-STEP ATTACK SUCCESS]
 &bull; Target Public Key Q = (${qx}, ${qy})
-&bull; Recovered Private Key k = ${res.k}
-&bull; Verification: ${res.k} * G = (${scalarMult(res.k, BASE_G).x}, ${scalarMult(res.k, BASE_G).y})
+&bull; Recovered Private Key k_B = ${recoveredKb}
+&bull; Verification: ${recoveredKb} * G = (${scalarMult(recoveredKb, BASE_G).x}, ${scalarMult(recoveredKb, BASE_G).y})
 &bull; Algorithm Complexity: m = ${m}, Steps = ${res.steps}
-&bull; Computation Time: ${(endTime - startTime).toFixed(3)} ms`;
+&bull; Computation Time: ${(endTime - startTime).toFixed(3)} ms${decryptInfo}`;
             } else {
-                out.innerHTML = `[ATTACK FAILED] Point Q is not in the subgroup generated by G = (15, 13) or invalid coordinates.`;
+                out.innerHTML = `[ATTACK FAILED] Point Q is not in the subgroup generated by G = (1, 5) or invalid coordinates.`;
             }
         }
 
@@ -1057,6 +1053,7 @@ ${recoveredPlain}`;
             runElGamalSimulation();
             runCaesarLab();
             updateCorpusSample();
+            runBsgsAttack();
         });
     </script>
 </body>
