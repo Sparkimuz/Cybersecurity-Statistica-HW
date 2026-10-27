@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMWK 04 — Stochastic Penetration Processes, LLN & Central Limit Theorem | Tommaso Cenciotti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #141F19;               /* Sfondo Generale */
+            --bg-card: #1E2D25;               /* Pannelli / Box Esercizio */
+            --bg-panel-inner: rgba(20, 31, 25, 0.75); /* Box interni / Terminali */
+            --text-main: #E2ECE7;             /* Testo Principale */
+            --text-muted: #8A9A92;            /* Testo Secondario */
+            --accent-cyan: #32B872;           /* Accento / Azioni Verde Menta */
+            --accent-blue: #32B872;           
+            --accent-purple: #10b981;
+            --accent-emerald: #32B872;
+            --accent-amber: #eab308;
+            --accent-rose: #f43f5e;
+            --border-color: rgba(138, 154, 146, 0.25);
+            --border-glow: rgba(50, 184, 114, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.65;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(circle at 12% 15%, rgba(50, 184, 114, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 88% 28%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* Top Header */
+        header {
+            background: rgba(14, 22, 17, 0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hw-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            background: rgba(50, 184, 114, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(50, 184, 114, 0.3);
+        }
+
+        .header-titles h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .header-titles p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(30, 45, 37, 0.8);
+            border: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            max-width: 1280px;
+            width: 100%;
+            margin: 2.25rem auto 4rem;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .panel-title i { color: var(--accent-cyan); }
+
+        .panel-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--accent-cyan);
+            background: rgba(50, 184, 114, 0.1);
+            border: 1px solid rgba(50, 184, 114, 0.3);
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.65rem;
+            color: var(--text-main);
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        p strong, li strong {
+            color: var(--text-main);
+        }
+
+        ul, ol {
+            color: var(--text-muted);
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        li {
+            margin-bottom: 0.45rem;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.84rem;
+            color: #E2ECE7;
+            background: rgba(14, 22, 17, 0.85);
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .formula-banner {
+            background: rgba(14, 22, 17, 0.85);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 1rem;
+        }
+
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .formula-item span.label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .formula-item span.math {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .interactive-box {
+            background: var(--bg-panel-inner);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.25rem;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="number"], textarea, select {
+            background: rgba(14, 22, 17, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.65rem 0.9rem;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(50, 184, 114, 0.2);
+        }
+
+        input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            background: #32B872 !important;
+            color: #141F19 !important;
+            border: none;
+            border-radius: 8px;
+            padding: 0.65rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700 !important;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.1);
+            box-shadow: 0 0 16px rgba(50, 184, 114, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(20, 31, 25, 0.85) !important;
+            color: #E2ECE7 !important;
+            border: 1px solid var(--border-color) !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: #32B872 !important;
+            color: #32B872 !important;
+            box-shadow: none;
+        }
+
+        .preset-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            margin-top: 0.85rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .kpi-card {
+            background: #0e1611;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem 1.15rem;
+        }
+
+        .kpi-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+        }
+
+        .kpi-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .kpi-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .output-box {
+            background: #0e1611;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.15rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.83rem;
+            color: var(--text-main);
+            margin-top: 1rem;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(540px, 1fr));
+            gap: 1.75rem;
+            margin-top: 1.75rem;
+        }
+
+        @media (max-width: 1150px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-panel-inner);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.35rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .chart-title {
+            font-size: 0.98rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+        }
+
+        .chart-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            background: #0e1611;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.88rem;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            background: rgba(20, 31, 25, 0.9);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            color: var(--text-muted);
+        }
+
+        .comparison-table td:first-child {
+            color: var(--text-main);
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+        }
+
+        .theory-card {
+            background: var(--bg-panel-inner);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.35rem;
+        }
+
+        .theory-card h4 {
+            font-size: 0.98rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2.25rem 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: rgba(14, 22, 17, 0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <div class="header-left">
+                <span class="hw-tag">HMWK 04 (HW 3)</span>
+                <div class="header-titles">
+                    <h1>Stochastic Penetration Processes: LLN, Variance Scaling &amp; Central Limit Theorem</h1>
+                    <p>Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+                </div>
+            </div>
+            <a href="index.html" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- SECTION 1: Stochastic Formulation & Interactive Monte Carlo Lab -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-network-wired"></i> 1. Stochastic Penetration Process &amp; Monte Carlo Simulator</h2>
+                <span class="panel-badge">n Systems &bull; m Attackers &bull; i.i.d. Increments X&#8342;</span>
+            </div>
+
+            <p>
+                We model the sequential penetration of <strong>n systems</strong> by <strong>m independent attackers</strong> as a discrete-time stochastic process with independent and identically distributed (i.i.d.) increments <code>X&#8321;, X&#8322;, &hellip;, X&#8345;</code>. At each step <code>i &isin; {1, &hellip;, n}</code>, an attacker attempts to compromise system <code>i</code>, yielding a step score <code>X&#8342;</code> under one of two probabilistic regimes:
+            </p>
+
+            <ul>
+                <li>
+                    <strong>Bernoulli Model (Cumulative Breach Process):</strong> <code>X&#8342; &isin; {0, 1}</code> with <code>P(X&#8342; = 1) = p</code> and <code>P(X&#8342; = 0) = 1 &minus; p</code>. Each step represents a binary breach outcome (<code>1</code> = compromised, <code>0</code> = defended), with step expectation <code>&mu;&#8339; = p</code> and step variance <code>&sigma;&#8339;&sup2; = p(1 &minus; p)</code>.
+                </li>
+                <li>
+                    <strong>Rademacher Model (Symmetric Zero-Mean Random Walk):</strong> <code>X&#8342; &isin; {&minus;1, +1}</code> with <code>P(X&#8342; = +1) = P(X&#8342; = &minus;1) = 1/2</code>. This models a symmetric tug-of-war between offense (<code>+1</code>) and defensive remediation/pushback (<code>&minus;1</code>), yielding exact zero drift <code>&mu;&#8339; = 0</code> and unit step variance <code>&sigma;&#8339;&sup2; = 1</code>.
+                </li>
+            </ul>
+
+            <div class="formula-banner">
+                <div class="formula-item">
+                    <span class="label">1. Total Score</span>
+                    <span class="math">S&#8345; = &sum;&#8342;&#8321;&#8319; X&#8342;</span>
+                </div>
+                <div class="formula-item">
+                    <span class="label">2. Average Score (LLN)</span>
+                    <span class="math">S&#8345; / n = (1 / n) &sum;&#8342;&#8321;&#8319; X&#8342;</span>
+                </div>
+                <div class="formula-item">
+                    <span class="label">3. Normalized Score (CLT)</span>
+                    <span class="math">S&#8345; / &radic;n = (1 / &radic;n) &sum;&#8342;&#8321;&#8319; X&#8342;</span>
+                </div>
+            </div>
+
+            <div class="interactive-box">
+                <h3 style="margin-top: 0; margin-bottom: 0.85rem;"><i class="fa-solid fa-sliders"></i> Interactive Trajectory &amp; Distribution Controls</h3>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="modelSelect">Increment Model (X&#8342;)</label>
+                        <select id="modelSelect" onchange="onModelChange()">
+                            <option value="rademacher" selected>Rademacher: X&#8342; &isin; {-1, +1}, P(+1) = 1/2</option>
+                            <option value="bernoulli">Bernoulli: X&#8342; &isin; {0, 1}, P(1) = p</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="inputN">Systems (n steps)</label>
+                        <input type="number" id="inputN" value="1000" min="10" max="10000" step="50">
+                    </div>
+                    <div class="control-group">
+                        <label for="inputM">Attackers (m trajectories)</label>
+                        <input type="number" id="inputM" value="400" min="10" max="2500" step="50">
+                    </div>
+                    <div class="control-group">
+                        <label for="inputP">Breach Probability p (Bernoulli)</label>
+                        <input type="number" id="inputP" value="0.50" min="0.05" max="0.95" step="0.05" disabled>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                    <button class="btn" onclick="runMonteCarlo()"><i class="fa-solid fa-play"></i> Simulate Trajectories &amp; Distributions</button>
+                    <button class="btn btn-secondary" onclick="applyPreset('rademacher', 1000, 500, 0.5)"><i class="fa-solid fa-bell"></i> Preset: Rademacher CLT (n=1000, m=500)</button>
+                    <button class="btn btn-secondary" onclick="applyPreset('bernoulli', 1000, 400, 0.65)"><i class="fa-solid fa-bullseye"></i> Preset: Bernoulli LLN (n=1000, p=0.65)</button>
+                    <button class="btn btn-secondary" onclick="applyPreset('rademacher', 40, 100, 0.5)"><i class="fa-solid fa-compress"></i> Preset: Small Scale (n=40, m=100)</button>
+                </div>
+
+                <div class="kpi-grid" id="kpiContainer">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Score S&#8345;</div>
+                        <div class="kpi-value" id="kpiTotalMean">--</div>
+                        <div class="kpi-sub" id="kpiTotalVar">Var: --</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Average Score S&#8345; / n</div>
+                        <div class="kpi-value" id="kpiAvgMean">--</div>
+                        <div class="kpi-sub" id="kpiAvgVar">Var: --</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Normalized S&#8345; / &radic;n</div>
+                        <div class="kpi-value" id="kpiNormMean">--</div>
+                        <div class="kpi-sub" id="kpiNormVar">Var: --</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Max Attacker Breach</div>
+                        <div class="kpi-value" id="kpiMaxBreach">--</div>
+                        <div class="kpi-sub" id="kpiNormality">CLT Fit: --</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <!-- CHART 1: Total Score S_n -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">1. Total Score Trajectories: S&#8346; = &sum; X&#8342;</div>
+                                <div class="chart-sub">Variance grows linearly: Var(S&#8345;) = n&sigma;&sup2; = O(n) &bull; Dashed: E[S&#8346;] &plusmn; 2&sigma; envelope</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasTotal" width="560" height="290"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- CHART 2: Average Score S_n / n -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">2. Average Score Trajectories: S&#8346; / k (Law of Large Numbers)</div>
+                                <div class="chart-sub">Convergence in probability: S&#8345;/n &rarr; &mu; &bull; Variance collapses: Var(S&#8345;/n) = &sigma;&sup2;/n &rarr; 0</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasAvg" width="560" height="290"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- CHART 3: Normalized Trajectories S_k / sqrt(k) -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">3. Normalized Score Trajectories: S&#8346; / &radic;k</div>
+                                <div class="chart-sub">Scale-invariant variance: Var(S&#8345;/&radic;n) = &sigma;&sup2; = O(1) &bull; Critical &radic;n scaling</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasNormTraj" width="560" height="290"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- CHART 4: CLT Histogram of S_n / sqrt(n) vs Gaussian PDF -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">4. Terminal Distribution of S&#8345; / &radic;n &amp; Central Limit Theorem</div>
+                                <div class="chart-sub">Histogram across m attackers vs. analytical Gaussian density N(&mu;&radic;n, &sigma;&sup2;) / N(0,1)</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasCltHist" width="560" height="290"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="simTerminalLog" class="output-box"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Multi-n Asymptotic Scaling Benchmark -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-chart-area"></i> 2. Multi-Scale Asymptotic Experiment (Increasing n)</h2>
+                <span class="panel-badge">n &isin; {10, 50, 100, 500, 1000, 5000} &bull; Variance &amp; LLN/CLT Verification</span>
+            </div>
+
+            <p>
+                To rigorously compare how the three quantities behave as the number of systems <code>n</code> increases, the experiment below simulates <code>m</code> trajectories across six orders of system scale <code>n &isin; {10, 50, 100, 500, 1000, 5000}</code> and tracks the empirical variance and mean against theoretical predictions.
+            </p>
+
+            <div class="interactive-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <strong style="color: var(--text-main); font-size: 0.95rem;">Asymptotic Scaling Benchmark across Increasing n</strong>
+                        <p style="margin: 0; font-size: 0.82rem;">Evaluates empirical vs. theoretical variance scaling for the currently selected model.</p>
+                    </div>
+                    <button class="btn" onclick="runScalingBenchmark()"><i class="fa-solid fa-rotate"></i> Run Multi-n Scaling Benchmark</button>
+                </div>
+
+                <div class="canvas-container" style="margin-bottom: 1.25rem;">
+                    <canvas id="canvasScaling" width="1140" height="280"></canvas>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="comparison-table" id="scalingTable">
+                        <thead>
+                            <tr>
+                                <th>Systems (n)</th>
+                                <th>Sample Mean(S&#8345;/n) [LLN Target: &mu;]</th>
+                                <th>Var(S&#8345;) [Theory: n&sigma;&sup2;]</th>
+                                <th>Var(S&#8345;/n) [Theory: &sigma;&sup2;/n]</th>
+                                <th>Var(S&#8345;/&radic;n) [Theory: &sigma;&sup2;]</th>
+                                <th>Max|CDF &minus; &Phi;| (KS Stat)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scalingTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Mathematical Comparison & Theoretical Analysis -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-square-root-variable"></i> 3. Mathematical Comparison of Normalizations, LLN &amp; CLT</h2>
+                <span class="panel-badge">Asymptotic Probability Theory</span>
+            </div>
+
+            <p>
+                Let <code>X&#8321;, X&#8322;, &hellip;, X&#8345;</code> be i.i.d. random variables with finite mean <code>&mu; = E[X&#8342;]</code> and finite positive variance <code>&sigma;&sup2; = Var(X&#8342;)</code>. By linearity of expectation and independence of increments, scaling the partial sum <code>S&#8345; = &sum; X&#8342;</code> by <code>n<sup>&minus;&alpha;</sup></code> scales the expectation by <code>n<sup>1&minus;&alpha;</sup></code> and the variance by <code>n<sup>1&minus;2&alpha;</sup></code>:
+            </p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Quantity</th>
+                        <th>Scaling Exponent (&alpha;)</th>
+                        <th>Bernoulli (X&#8342; &isin; {0,1}, &mu;=p, &sigma;&sup2;=p(1-p))</th>
+                        <th>Rademacher (X&#8342; &isin; {-1,+1}, &mu;=0, &sigma;&sup2;=1)</th>
+                        <th>Variance Scaling as n &rarr; &infin;</th>
+                        <th>Asymptotic Behavior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total Score: S&#8345;</td>
+                        <td><code>&alpha; = 0</code> (No division)</td>
+                        <td><code>E = np</code><br><code>Var = np(1 &minus; p)</code></td>
+                        <td><code>E = 0</code><br><code>Var = n</code></td>
+                        <td><strong>Diverges linearly:</strong> <code>O(n) &rarr; &infin;</code></td>
+                        <td>Dispersion widens indefinitely; standard deviation grows as <code>&sigma;&radic;n</code>.</td>
+                    </tr>
+                    <tr>
+                        <td>Average Score: S&#8345; / n</td>
+                        <td><code>&alpha; = 1</code> (Divide by n)</td>
+                        <td><code>E = p</code><br><code>Var = p(1 &minus; p) / n</code></td>
+                        <td><code>E = 0</code><br><code>Var = 1 / n</code></td>
+                        <td><strong>Collapses to zero:</strong> <code>O(1/n) &rarr; 0</code></td>
+                        <td><strong>Law of Large Numbers:</strong> Converges in probability (<code>S&#8345;/n &rarr;<sup>P</sup> &mu;</code>) to a deterministic constant.</td>
+                    </tr>
+                    <tr>
+                        <td>Normalized Score: S&#8345; / &radic;n</td>
+                        <td><code>&alpha; = 1/2</code> (Divide by &radic;n)</td>
+                        <td><code>E = &radic;n &middot; p</code> (drifts to +&infin;)<br><code>Var = p(1 &minus; p)</code></td>
+                        <td><code>E = 0</code><br><code>Var = 1</code></td>
+                        <td><strong>Constant &amp; invariant:</strong> <code>O(1) = &sigma;&sup2;</code></td>
+                        <td><strong>Central Limit Theorem:</strong> In Rademacher, <code>S&#8345;/&radic;n &rarr;<sup>d</sup> N(0, 1)</code>. In Bernoulli, <code>(S&#8345; &minus; np)/&radic;n &rarr;<sup>d</sup> N(0, p(1&minus;p))</code>.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="theory-grid">
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-bullseye"></i> 1. Convergence in Probability (Law of Large Numbers)</h4>
+                    <p>
+                        For the sample average <code>S&#8345;/n</code>, we have <code>E[S&#8345;/n] = &mu;</code> and <code>Var(S&#8345;/n) = &sigma;&sup2;/n</code>. Applying <strong>Chebyshev's Inequality</strong> for any threshold <code>&epsilon; &gt; 0</code>:
+                    </p>
+                    <p style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--text-main);">
+                        P(|S&#8345;/n &minus; &mu;| &ge; &epsilon;) &le; Var(S&#8345;/n) / &epsilon;&sup2; = &sigma;&sup2; / (n&epsilon;&sup2;) &rarr; 0
+                    </p>
+                    <p style="margin-bottom: 0;">
+                        As <code>n &rarr; &infin;</code>, the probability that the empirical penetration rate deviates from the true mean <code>&mu;</code> (<code>p</code> for Bernoulli, <code>0</code> for Rademacher) vanishes. Visually, the <code>m</code> trajectories form a narrowing funnel that pinches onto the horizontal line <code>y = &mu;</code>.
+                    </p>
+                </div>
+
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-scale-balanced"></i> 2. Variance Behavior under Normalizations</h4>
+                    <p>
+                        Because the increments <code>X&#8342;</code> are independent, their variances add linearly: <code>Var(S&#8345;) = &sum; Var(X&#8342;) = n&sigma;&sup2;</code>. When we multiply <code>S&#8345;</code> by a deterministic factor <code>c&#8345;</code>, the variance scales quadratically by <code>c&#8345;&sup2;</code>:
+                    </p>
+                    <ul>
+                        <li>For <code>c&#8345; = 1</code>: <code>Var(S&#8345;) = n&sigma;&sup2; &rarr; &infin;</code> (unbounded spread).</li>
+                        <li>For <code>c&#8345; = 1/n</code>: <code>Var(S&#8345;/n) = (1/n&sup2;)n&sigma;&sup2; = &sigma;&sup2;/n &rarr; 0</code> (degenerate point mass).</li>
+                        <li>For <code>c&#8345; = 1/&radic;n</code>: <code>Var(S&#8345;/&radic;n) = (1/n)n&sigma;&sup2; = &sigma;&sup2;</code> (non-degenerate, stable distribution).</li>
+                    </ul>
+                    <p style="margin-bottom: 0;">
+                        Thus, <code>&radic;n</code> is the unique <strong>critical scaling factor</strong> that neither blows up the variance nor crushes random fluctuations to zero.
+                    </p>
+                </div>
+
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-bell"></i> 3. Central Limit Theorem in the Rademacher Model</h4>
+                    <p>
+                        In the symmetric Rademacher model, <code>E[X&#8342;] = 0</code> and <code>Var(X&#8342;) = 1</code>. Therefore, the normalized total score is already standardized:
+                    </p>
+                    <p style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--text-main);">
+                        Z&#8345; = (S&#8345; &minus; n&mu;) / (&sigma;&radic;n) = S&#8345; / &radic;n &rarr;<sup>d</sup> N(0, 1)
+                    </p>
+                    <p style="margin-bottom: 0;">
+                        Using characteristic functions, <code>&phi;<sub>S&#8345;/&radic;n</sub>(t) = E[e<sup>itX&#8321;/&radic;n</sup>]<sup>n</sup> = [&cos;(t/&radic;n)]<sup>n</sup> = (1 &minus; t&sup2;/(2n) + O(n<sup>&minus;2</sup>))<sup>n</sup> &rarr; e<sup>&minus;t&sup2;/2</sup></code>, which is the exact characteristic function of the Standard Normal <code>N(0, 1)</code>. By contrast, in the Bernoulli model (<code>&mu; = p &gt; 0</code>), <code>S&#8345;/&radic;n = &radic;n&middot;p + &radic;(p(1&minus;p))Z&#8345;</code> has constant variance <code>p(1&minus;p)</code> but its center drifts to <code>+&infin;</code> at rate <code>&radic;n&middot;p</code>.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Cybersecurity Interpretation -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-shield-halved"></i> 4. Cybersecurity Interpretation: n Systems &amp; m Attackers</h2>
+                <span class="panel-badge">Threat Modeling &bull; Attack Surface vs. Adversary Population</span>
+            </div>
+
+            <div class="theory-grid" style="margin-top: 0.5rem;">
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-server"></i> Role of System Scale (n)</h4>
+                    <p>
+                        The parameter <strong>n</strong> represents the horizontal attack surface (number of hosts/endpoints audited by an attacker) or the depth of a multi-stage defense architecture:
+                    </p>
+                    <ul>
+                        <li><strong>Predictability of Compromise Rate (LLN):</strong> Across a large enterprise infrastructure (large <code>n</code>), the fraction of compromised systems <code>S&#8345;/n</code> stabilizes tightly around the intrinsic vulnerability probability <code>p</code>. Security posture metrics measured over large asset inventories have minimal sampling noise (<code>&pm;1/&radic;n</code>).</li>
+                        <li><strong>Growth of Absolute Exposure (Total Score S&#8345;):</strong> In the Bernoulli model, expected compromised assets grow linearly as <code>np</code>, while uncertainty grows as <code>&radic;(np(1&minus;p))</code>. Even in a balanced cyber conflict (Rademacher, zero average drift), an attacker can achieve large temporary excursions of order <code>O(&radic;n)</code> purely by random fluctuation.</li>
+                    </ul>
+                </div>
+
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-user-secret"></i> Role of Attacker Population (m)</h4>
+                    <p>
+                        The parameter <strong>m</strong> represents the number of concurrent threat actors (or automated botnet campaigns) probing the infrastructure simultaneously:
+                    </p>
+                    <ul>
+                        <li><strong>Empirical Resolution of Threat Distributions:</strong> While a single attacker (<code>m = 1</code>) traces one erratic random path, a large adversary population (large <code>m</code>) populates the entire probability distribution, making the Gaussian bell curve of <code>S&#8345;/&radic;n</code> empirically visible.</li>
+                        <li><strong>Extreme-Value Tail Risk (Worst-Case Breach):</strong> A defender must protect against the <em>most successful</em> attacker among all <code>m</code> adversaries: <code>M<sub>n,m</sub> = max<sub>1&le;j&le;m</sub> S&#8345;<sup>(j)</sup></code>. Because <code>S&#8345;/&radic;n &approx; N(0, 1)</code> in the Rademacher case, extreme value theory for Gaussian maxima implies that as <code>m</code> grows, the worst-case penetration scales as <code>E[max S&#8345;] &approx; &radic;n &middot; &radic;(2 ln m)</code>. More attackers directly increase the probability of a low-probability, high-impact tail breach.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Tommaso Cenciotti &bull; Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+    </footer>
+
+    <script>
+        // --- Mathematical Helpers ---
+        function normalPDF(x, mean, std) {
+            if (std <= 0) return 0;
+            const z = (x - mean) / std;
+            return (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+        }
+
+        // Approximation of Standard Normal CDF Phi(z) (Abramowitz & Stegun)
+        function stdNormalCDF(z) {
+            const sign = z < 0 ? -1 : 1;
+            const x = Math.abs(z) / Math.sqrt(2);
+            const t = 1 / (1 + 0.3275911 * x);
+            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+            const a4 = -1.453152027, a5 = 1.061405429;
+            const erf = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return 0.5 * (1 + sign * erf);
+        }
+
+        function onModelChange() {
+            const model = document.getElementById('modelSelect').value;
+            const pInput = document.getElementById('inputP');
+            if (model === 'rademacher') {
+                pInput.value = '0.50';
+                pInput.disabled = true;
+            } else {
+                pInput.disabled = false;
+            }
+            runMonteCarlo();
+            runScalingBenchmark();
+        }
+
+        function applyPreset(model, n, m, p) {
+            document.getElementById('modelSelect').value = model;
+            document.getElementById('inputN').value = n;
+            document.getElementById('inputM').value = m;
+            document.getElementById('inputP').value = p.toFixed(2);
+            document.getElementById('inputP').disabled = (model === 'rademacher');
+            runMonteCarlo();
+            runScalingBenchmark();
+        }
+
+        function sampleStats(arr) {
+            const m = arr.length;
+            if (m === 0) return { mean: 0, variance: 0, std: 0, min: 0, max: 0 };
+            let sum = 0;
+            let min = Infinity, max = -Infinity;
+            for (let i = 0; i < m; i++) {
+                const v = arr[i];
+                sum += v;
+                if (v < min) min = v;
+                if (v > max) max = v;
+            }
+            const mean = sum / m;
+            let sqDiff = 0;
+            for (let i = 0; i < m; i++) {
+                const d = arr[i] - mean;
+                sqDiff += d * d;
+            }
+            const variance = m > 1 ? sqDiff / (m - 1) : 0;
+            return { mean, variance, std: Math.sqrt(variance), min, max };
+        }
+
+        function computeKSStatistic(standardizedValues) {
+            const sorted = [...standardizedValues].sort((a, b) => a - b);
+            const m = sorted.length;
+            let maxDiff = 0;
+            for (let i = 0; i < m; i++) {
+                const cdfTheo = stdNormalCDF(sorted[i]);
+                const empBefore = i / m;
+                const empAfter = (i + 1) / m;
+                const diff = Math.max(Math.abs(empBefore - cdfTheo), Math.abs(empAfter - cdfTheo));
+                if (diff > maxDiff) maxDiff = diff;
+            }
+            return maxDiff;
+        }
+
+        // --- Core Simulation ---
+        function runMonteCarlo() {
+            const model = document.getElementById('modelSelect').value;
+            let n = parseInt(document.getElementById('inputN').value, 10);
+            let m = parseInt(document.getElementById('inputM').value, 10);
+            let p = parseFloat(document.getElementById('inputP').value);
+
+            if (isNaN(n) || n < 5) n = 100;
+            if (n > 10000) { n = 10000; document.getElementById('inputN').value = 10000; }
+            if (isNaN(m) || m < 5) m = 50;
+            if (m > 2500) { m = 2500; document.getElementById('inputM').value = 2500; }
+            if (isNaN(p) || p <= 0 || p >= 1) p = 0.5;
+
+            const isRademacher = (model === 'rademacher');
+            const muStep = isRademacher ? 0 : p;
+            const varStep = isRademacher ? 1 : p * (1 - p);
+            const stdStep = Math.sqrt(varStep);
+
+            // Downsample trajectory plotting steps if n is large to keep canvas crisp and fast
+            const maxPlotSteps = Math.min(n, 250);
+            const plotIndices = [];
+            for (let s = 0; s < maxPlotSteps; s++) {
+                const idx = Math.max(1, Math.round(((s + 1) / maxPlotSteps) * n));
+                if (plotIndices.length === 0 || plotIndices[plotIndices.length - 1] !== idx) {
+                    plotIndices.push(idx);
+                }
+            }
+
+            // Store subset of trajectories for plotting (up to 65 trajectories for visual clarity)
+            const maxVisibleTraj = Math.min(m, 65);
+            const trajTotal = [];
+            const trajAvg = [];
+            const trajNorm = [];
+
+            const finalTotal = new Float64Array(m);
+            const finalAvg = new Float64Array(m);
+            const finalNorm = new Float64Array(m);
+            const finalStandardized = new Float64Array(m);
+
+            for (let j = 0; j < m; j++) {
+                let sum = 0;
+                const keepTraj = j < maxVisibleTraj;
+                const tTot = keepTraj ? new Float32Array(plotIndices.length) : null;
+                const tAvg = keepTraj ? new Float32Array(plotIndices.length) : null;
+                const tNorm = keepTraj ? new Float32Array(plotIndices.length) : null;
+                let ptr = 0;
+
+                for (let i = 1; i <= n; i++) {
+                    if (isRademacher) {
+                        sum += (Math.random() < 0.5 ? 1 : -1);
+                    } else {
+                        sum += (Math.random() < p ? 1 : 0);
+                    }
+
+                    if (keepTraj && i === plotIndices[ptr]) {
+                        tTot[ptr] = sum;
+                        tAvg[ptr] = sum / i;
+                        tNorm[ptr] = sum / Math.sqrt(i);
+                        ptr++;
+                    }
+                }
+
+                if (keepTraj) {
+                    trajTotal.push(tTot);
+                    trajAvg.push(tAvg);
+                    trajNorm.push(tNorm);
+                }
+
+                finalTotal[j] = sum;
+                finalAvg[j] = sum / n;
+                finalNorm[j] = sum / Math.sqrt(n);
+                finalStandardized[j] = (sum - n * muStep) / (stdStep * Math.sqrt(n));
+            }
+
+            const statsTot = sampleStats(finalTotal);
+            const statsAvg = sampleStats(finalAvg);
+            const statsNorm = sampleStats(finalNorm);
+            const ksStat = computeKSStatistic(finalStandardized);
+
+            // Theoretical terminal metrics
+            const theoTotMean = n * muStep;
+            const theoTotVar = n * varStep;
+            const theoAvgMean = muStep;
+            const theoAvgVar = varStep / n;
+            const theoNormMean = Math.sqrt(n) * muStep;
+            const theoNormVar = varStep;
+
+            // Update KPI cards
+            document.getElementById('kpiTotalMean').innerText = `${statsTot.mean.toFixed(2)} (Theo: ${theoTotMean.toFixed(1)})`;
+            document.getElementById('kpiTotalVar').innerText = `Emp Var: ${statsTot.variance.toFixed(2)} | Theo: ${theoTotVar.toFixed(2)}`;
+
+            document.getElementById('kpiAvgMean').innerText = `${statsAvg.mean.toFixed(4)} (Theo: ${theoAvgMean.toFixed(4)})`;
+            document.getElementById('kpiAvgVar').innerText = `Emp Var: ${statsAvg.variance.toFixed(5)} | Theo: ${theoAvgVar.toFixed(5)}`;
+
+            document.getElementById('kpiNormMean').innerText = `${statsNorm.mean.toFixed(3)} (Theo: ${theoNormMean.toFixed(3)})`;
+            document.getElementById('kpiNormVar').innerText = `Emp Var: ${statsNorm.variance.toFixed(4)} | Theo: ${theoNormVar.toFixed(4)}`;
+
+            document.getElementById('kpiMaxBreach').innerText = `Max S_n = ${statsTot.max} | Min = ${statsTot.min}`;
+            document.getElementById('kpiNormality').innerText = `KS Stat D = ${ksStat.toFixed(4)} (CLT Fit)`;
+
+            // Update Terminal Output Box
+            const logBox = document.getElementById('simTerminalLog');
+            logBox.innerHTML = `[MONTE CARLO PENETRATION SIMULATION SUMMARY — Model: ${isRademacher ? 'RADEMACHER {-1, +1}' : 'BERNOULLI {0, 1} (p=' + p.toFixed(2) + ')'}]
+• Parameters:              n = ${n} systems, m = ${m} attackers | Step Mean μ_X = ${muStep.toFixed(3)}, Step Variance σ_X² = ${varStep.toFixed(4)}
+• 1. Total Score (S_n):    Empirical Mean = ${statsTot.mean.toFixed(3)} (Theo: ${theoTotMean.toFixed(3)}) | Empirical Var = ${statsTot.variance.toFixed(3)} (Theo: nσ² = ${theoTotVar.toFixed(3)})
+• 2. Average Score (S_n/n):Empirical Mean = ${statsAvg.mean.toFixed(4)} (Theo: ${theoAvgMean.toFixed(4)}) | Empirical Var = ${statsAvg.variance.toFixed(6)} (Theo: σ²/n = ${theoAvgVar.toFixed(6)}) -> LLN Convergence!
+• 3. Norm Score (S_n/√n):  Empirical Mean = ${statsNorm.mean.toFixed(4)} (Theo: ${theoNormMean.toFixed(4)}) | Empirical Var = ${statsNorm.variance.toFixed(4)} (Theo: σ² = ${theoNormVar.toFixed(4)}) -> Scale-Invariant Variance!
+• Central Limit Theorem:   Kolmogorov-Smirnov distance to Gaussian N(${theoNormMean.toFixed(2)}, ${theoNormVar.toFixed(3)}) is D = ${ksStat.toFixed(4)} (Critical 5% threshold = ${(1.36 / Math.sqrt(m)).toFixed(4)})`;
+
+            // Draw the 4 main charts
+            drawTrajectoryChart('canvasTotal', plotIndices, trajTotal, finalTotal, n, k => k * muStep, k => 2 * Math.sqrt(k) * stdStep, 'S_n');
+            drawTrajectoryChart('canvasAvg', plotIndices, trajAvg, finalAvg, n, k => muStep, k => 2 * stdStep / Math.sqrt(k), 'S_n / n');
+            drawTrajectoryChart('canvasNormTraj', plotIndices, trajNorm, finalNorm, n, k => Math.sqrt(k) * muStep, k => 2 * stdStep, 'S_n / √n');
+            drawCltHistogramChart('canvasCltHist', finalNorm, theoNormMean, Math.sqrt(theoNormVar), isRademacher);
+        }
+
+        // --- Trajectory + Marginal Histogram Renderer ---
+        function drawTrajectoryChart(canvasId, plotIndices, trajectories, finalValues, n, meanFn, envFn, label) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            ctx.fillStyle = '#0e1611';
+            ctx.fillRect(0, 0, W, H);
+
+            const padLeft = 52, padRight = 85, padTop = 22, padBottom = 32;
+            const plotW = W - padLeft - padRight;
+            const plotH = H - padTop - padBottom;
+            const histW = padRight - 16;
+
+            // Compute Y bounds across trajectories and theoretical envelope
+            let yMin = Infinity, yMax = -Infinity;
+            for (let t = 0; t < trajectories.length; t++) {
+                const arr = trajectories[t];
+                for (let idx = 0; idx < arr.length; idx++) {
+                    if (arr[idx] < yMin) yMin = arr[idx];
+                    if (arr[idx] > yMax) yMax = arr[idx];
+                }
+            }
+            for (let s = 0; s < plotIndices.length; s++) {
+                const k = plotIndices[s];
+                const mVal = meanFn(k);
+                const eVal = envFn(k);
+                if (mVal - eVal < yMin) yMin = mVal - eVal;
+                if (mVal + eVal > yMax) yMax = mVal + eVal;
+            }
+            if (yMin === yMax) { yMin -= 1; yMax += 1; }
+            const yMargin = (yMax - yMin) * 0.08;
+            yMin -= yMargin;
+            yMax += yMargin;
+
+            const xToPx = k => padLeft + (k / n) * plotW;
+            const yToPx = y => padTop + plotH - ((y - yMin) / (yMax - yMin)) * plotH;
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(138, 154, 146, 0.16)';
+            ctx.lineWidth = 1;
+            const yTicks = 5;
+            for (let i = 0; i <= yTicks; i++) {
+                const val = yMin + (i / yTicks) * (yMax - yMin);
+                const py = yToPx(val);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, py);
+                ctx.lineTo(padLeft + plotW, py);
+                ctx.stroke();
+
+                ctx.fillStyle = '#8A9A92';
+                ctx.font = '10px JetBrains Mono';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.abs(val) >= 100 ? val.toFixed(0) : val.toFixed(2), padLeft - 6, py + 3);
+            }
+
+            // Sample Trajectories
+            ctx.lineWidth = 1.1;
+            for (let t = 0; t < trajectories.length; t++) {
+                const arr = trajectories[t];
+                ctx.strokeStyle = t === 0 ? '#eab308' : 'rgba(50, 184, 114, 0.22)';
+                if (t === 0) ctx.lineWidth = 1.8;
+                else ctx.lineWidth = 1.0;
+
+                ctx.beginPath();
+                for (let idx = 0; idx < plotIndices.length; idx++) {
+                    const px = xToPx(plotIndices[idx]);
+                    const py = yToPx(arr[idx]);
+                    if (idx === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+
+            // Theoretical Mean Line E[Y_k]
+            ctx.strokeStyle = '#E2ECE7';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let idx = 0; idx < plotIndices.length; idx++) {
+                const k = plotIndices[idx];
+                const px = xToPx(k);
+                const py = yToPx(meanFn(k));
+                if (idx === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Theoretical +/- 2 sigma envelope
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 1.3;
+            ctx.setLineDash([4, 4]);
+            for (let sign of [-1, 1]) {
+                ctx.beginPath();
+                for (let idx = 0; idx < plotIndices.length; idx++) {
+                    const k = plotIndices[idx];
+                    const px = xToPx(k);
+                    const py = yToPx(meanFn(k) + sign * envFn(k));
+                    if (idx === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            // Marginal Terminal Histogram on the right
+            const bins = 22;
+            const counts = new Int32Array(bins);
+            for (let i = 0; i < finalValues.length; i++) {
+                const v = finalValues[i];
+                let b = Math.floor(((v - yMin) / (yMax - yMin)) * bins);
+                if (b < 0) b = 0;
+                if (b >= bins) b = bins - 1;
+                counts[b]++;
+            }
+            let maxCount = 1;
+            for (let b = 0; b < bins; b++) if (counts[b] > maxCount) maxCount = counts[b];
+
+            const histBaseX = padLeft + plotW + 6;
+            ctx.strokeStyle = 'rgba(138, 154, 146, 0.35)';
+            ctx.beginPath();
+            ctx.moveTo(histBaseX, padTop);
+            ctx.lineTo(histBaseX, padTop + plotH);
+            ctx.stroke();
+
+            const binH = plotH / bins;
+            for (let b = 0; b < bins; b++) {
+                const barLen = (counts[b] / maxCount) * (histW - 6);
+                const py = padTop + plotH - (b + 1) * binH;
+                ctx.fillStyle = 'rgba(50, 184, 114, 0.65)';
+                ctx.fillRect(histBaseX + 1, py + 1, barLen, Math.max(1, binH - 1.5));
+            }
+
+            // X Axis Labels
+            ctx.fillStyle = '#8A9A92';
+            ctx.font = '10px JetBrains Mono';
+            ctx.textAlign = 'center';
+            ctx.fillText('k = 1', padLeft + 14, H - 10);
+            ctx.fillText(`k = ${Math.round(n / 2)}`, padLeft + plotW / 2, H - 10);
+            ctx.fillText(`n = ${n}`, padLeft + plotW - 18, H - 10);
+            ctx.fillText('Dist(n)', histBaseX + histW / 2, H - 10);
+
+            // Legend
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#eab308';
+            ctx.fillRect(padLeft + 8, padTop + 6, 10, 3);
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText('Sample Path', padLeft + 22, padTop + 10);
+
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillRect(padLeft + 100, padTop + 6, 10, 3);
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText('±2σ Bounds', padLeft + 114, padTop + 10);
+        }
+
+        // --- Chart 4: Terminal Histogram of S_n / sqrt(n) vs Gaussian PDF ---
+        function drawCltHistogramChart(canvasId, normValues, theoMean, theoStd, isRademacher) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            ctx.fillStyle = '#0e1611';
+            ctx.fillRect(0, 0, W, H);
+
+            const padLeft = 48, padRight = 20, padTop = 25, padBottom = 34;
+            const plotW = W - padLeft - padRight;
+            const plotH = H - padTop - padBottom;
+
+            const xMin = theoMean - 4.0 * theoStd;
+            const xMax = theoMean + 4.0 * theoStd;
+
+            const bins = 24;
+            const binWidth = (xMax - xMin) / bins;
+            const counts = new Int32Array(bins);
+            let totalInRange = 0;
+
+            for (let i = 0; i < normValues.length; i++) {
+                const v = normValues[i];
+                const b = Math.floor((v - xMin) / binWidth);
+                if (b >= 0 && b < bins) {
+                    counts[b]++;
+                }
+                totalInRange++;
+            }
+
+            // Convert counts to probability density: count / (m * binWidth)
+            const densities = new Float64Array(bins);
+            let maxDensity = normalPDF(theoMean, theoMean, theoStd) * 1.22;
+            for (let b = 0; b < bins; b++) {
+                densities[b] = counts[b] / (normValues.length * binWidth);
+                if (densities[b] > maxDensity) maxDensity = densities[b] * 1.1;
+            }
+
+            const xToPx = x => padLeft + ((x - xMin) / (xMax - xMin)) * plotW;
+            const yToPx = d => padTop + plotH - (d / maxDensity) * plotH;
+
+            // Grid
+            ctx.strokeStyle = 'rgba(138, 154, 146, 0.16)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const dVal = (i / 4) * maxDensity;
+                const py = yToPx(dVal);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, py);
+                ctx.lineTo(padLeft + plotW, py);
+                ctx.stroke();
+
+                ctx.fillStyle = '#8A9A92';
+                ctx.font = '10px JetBrains Mono';
+                ctx.textAlign = 'right';
+                ctx.fillText(dVal.toFixed(2), padLeft - 6, py + 3);
+            }
+
+            // Histogram bars
+            for (let b = 0; b < bins; b++) {
+                const bx0 = xMin + b * binWidth;
+                const px0 = xToPx(bx0);
+                const px1 = xToPx(bx0 + binWidth);
+                const py = yToPx(densities[b]);
+                const barH = padTop + plotH - py;
+
+                ctx.fillStyle = 'rgba(50, 184, 114, 0.45)';
+                ctx.fillRect(px0 + 1, py, Math.max(1, px1 - px0 - 2), barH);
+                ctx.strokeStyle = '#32B872';
+                ctx.strokeRect(px0 + 1, py, Math.max(1, px1 - px0 - 2), barH);
+            }
+
+            // Smooth Analytical Gaussian PDF Curve
+            ctx.strokeStyle = '#eab308';
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            const steps = 160;
+            for (let s = 0; s <= steps; s++) {
+                const x = xMin + (s / steps) * (xMax - xMin);
+                const d = normalPDF(x, theoMean, theoStd);
+                const px = xToPx(x);
+                const py = yToPx(d);
+                if (s === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // X-axis ticks
+            ctx.fillStyle = '#8A9A92';
+            ctx.font = '10px JetBrains Mono';
+            ctx.textAlign = 'center';
+            for (let s = -3; s <= 3; s++) {
+                const xVal = theoMean + s * theoStd;
+                const px = xToPx(xVal);
+                ctx.fillText(xVal.toFixed(1), px, H - 10);
+            }
+
+            // Legend
+            ctx.font = '10px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = 'rgba(50, 184, 114, 0.7)';
+            ctx.fillRect(padLeft + 10, padTop + 6, 10, 10);
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText('Empirical Density (S_n / √n)', padLeft + 25, padTop + 15);
+
+            ctx.fillStyle = '#eab308';
+            ctx.fillRect(padLeft + 185, padTop + 9, 14, 3);
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText(isRademacher ? 'Standard Normal PDF N(0, 1)' : `CLT Gaussian PDF N(${theoMean.toFixed(1)}, ${ (theoStd*theoStd).toFixed(2) })`, padLeft + 205, padTop + 15);
+        }
+
+        // --- Section 2: Multi-n Asymptotic Scaling Benchmark ---
+        function runScalingBenchmark() {
+            const model = document.getElementById('modelSelect').value;
+            const isRademacher = (model === 'rademacher');
+            const p = isRademacher ? 0.5 : parseFloat(document.getElementById('inputP').value) || 0.5;
+            const muStep = isRademacher ? 0 : p;
+            const varStep = isRademacher ? 1 : p * (1 - p);
+            const stdStep = Math.sqrt(varStep);
+
+            const nList = [10, 50, 100, 500, 1000, 5000];
+            const mBench = 400;
+            const tbody = document.getElementById('scalingTableBody');
+            tbody.innerHTML = '';
+
+            const empVarTot = [];
+            const empVarAvg = [];
+            const empVarNorm = [];
+
+            for (let n of nList) {
+                const arrTot = new Float64Array(mBench);
+                const arrAvg = new Float64Array(mBench);
+                const arrNorm = new Float64Array(mBench);
+                const arrStd = new Float64Array(mBench);
+
+                for (let j = 0; j < mBench; j++) {
+                    let s = 0;
+                    for (let i = 0; i < n; i++) {
+                        s += isRademacher ? (Math.random() < 0.5 ? 1 : -1) : (Math.random() < p ? 1 : 0);
+                    }
+                    arrTot[j] = s;
+                    arrAvg[j] = s / n;
+                    arrNorm[j] = s / Math.sqrt(n);
+                    arrStd[j] = (s - n * muStep) / (stdStep * Math.sqrt(n));
+                }
+
+                const stTot = sampleStats(arrTot);
+                const stAvg = sampleStats(arrAvg);
+                const stNorm = sampleStats(arrNorm);
+                const ks = computeKSStatistic(arrStd);
+
+                empVarTot.push(stTot.variance);
+                empVarAvg.push(stAvg.variance);
+                empVarNorm.push(stNorm.variance);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>n = ${n}</td>
+                    <td>${stAvg.mean.toFixed(4)} <span style="color:#8A9A92;">(Theo: ${muStep.toFixed(3)})</span></td>
+                    <td>${stTot.variance.toFixed(2)} <span style="color:#8A9A92;">(Theo: ${(n * varStep).toFixed(2)})</span></td>
+                    <td>${stAvg.variance.toFixed(5)} <span style="color:#8A9A92;">(Theo: ${(varStep / n).toFixed(5)})</span></td>
+                    <td style="color:#32B872; font-weight:600;">${stNorm.variance.toFixed(4)} <span style="color:#8A9A92; font-weight:400;">(Theo: ${varStep.toFixed(4)})</span></td>
+                    <td>${ks.toFixed(4)}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            drawScalingChart('canvasScaling', nList, empVarTot, empVarAvg, empVarNorm, varStep);
+        }
+
+        function drawScalingChart(canvasId, nList, empVarTot, empVarAvg, empVarNorm, varStep) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            ctx.fillStyle = '#0e1611';
+            ctx.fillRect(0, 0, W, H);
+
+            const padLeft = 65, padRight = 30, padTop = 28, padBottom = 36;
+            const plotW = W - padLeft - padRight;
+            const plotH = H - padTop - padBottom;
+
+            // Log10 scale for both X (n) and Y (Variance)
+            const logXMin = Math.log10(nList[0]);
+            const logXMax = Math.log10(nList[nList.length - 1]);
+            const logYMin = -4.5;
+            const logYMax = 4.0;
+
+            const xToPx = n => padLeft + ((Math.log10(n) - logXMin) / (logXMax - logXMin)) * plotW;
+            const yToPx = v => {
+                const lv = Math.max(logYMin, Math.min(logYMax, Math.log10(Math.max(1e-6, v))));
+                return padTop + plotH - ((lv - logYMin) / (logYMax - logYMin)) * plotH;
+            };
+
+            // Grid
+            ctx.strokeStyle = 'rgba(138, 154, 146, 0.16)';
+            ctx.lineWidth = 1;
+            for (let ly = -4; ly <= 4; ly += 2) {
+                const py = padTop + plotH - ((ly - logYMin) / (logYMax - logYMin)) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(padLeft, py);
+                ctx.lineTo(padLeft + plotW, py);
+                ctx.stroke();
+
+                ctx.fillStyle = '#8A9A92';
+                ctx.font = '10px JetBrains Mono';
+                ctx.textAlign = 'right';
+                ctx.fillText(`10^${ly}`, padLeft - 8, py + 3);
+            }
+
+            // Plot lines helper
+            function plotSeries(values, color, label) {
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                for (let i = 0; i < nList.length; i++) {
+                    const px = xToPx(nList[i]);
+                    const py = yToPx(values[i]);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+
+                for (let i = 0; i < nList.length; i++) {
+                    const px = xToPx(nList[i]);
+                    const py = yToPx(values[i]);
+                    ctx.beginPath();
+                    ctx.arc(px, py, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+
+            plotSeries(empVarTot, '#f43f5e', 'Var(S_n) = O(n)');
+            plotSeries(empVarNorm, '#32B872', 'Var(S_n / √n) = σ² = O(1)');
+            plotSeries(empVarAvg, '#eab308', 'Var(S_n / n) = O(1/n)');
+
+            // X labels
+            ctx.fillStyle = '#8A9A92';
+            ctx.font = '11px JetBrains Mono';
+            ctx.textAlign = 'center';
+            for (let n of nList) {
+                ctx.fillText(`n=${n}`, xToPx(n), H - 10);
+            }
+
+            // Legend
+            ctx.font = '11px Inter';
+            ctx.textAlign = 'left';
+            const legX = padLeft + 16;
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillRect(legX, padTop + 6, 12, 4);
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText('Var(S_n) ∝ n (Diverges)', legX + 18, padTop + 11);
+
+            ctx.fillStyle = '#32B872';
+            ctx.fillRect(legX + 190, padTop + 6, 12, 4);
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText('Var(S_n / √n) = σ² (Constant / CLT)', legX + 208, padTop + 11);
+
+            ctx.fillStyle = '#eab308';
+            ctx.fillRect(legX + 435, padTop + 6, 12, 4);
+            ctx.fillStyle = '#E2ECE7';
+            ctx.fillText('Var(S_n / n) ∝ 1/n (Collapses to 0 / LLN)', legX + 453, padTop + 11);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            runMonteCarlo();
+            runScalingBenchmark();
+        });
+    </script>
+</body>
+</html>
