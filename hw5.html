@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMWK 05 — Riemann vs Lebesgue Integration & Normal CDF | Tommaso Cenciotti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        :root {
+            --bg-main: #141F19;               
+            --bg-card: #1E2D25;               
+            --bg-panel-inner: rgba(20, 31, 25, 0.75); 
+            --text-main: #E2ECE7;             
+            --text-muted: #8A9A92;            
+            --accent-cyan: #32B872;           
+            --accent-secondary: #4ade80; 
+            --border-color: rgba(138, 154, 146, 0.25);
+            --border-glow: rgba(50, 184, 114, 0.35);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.65;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(circle at 12% 15%, rgba(50, 184, 114, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 88% 28%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        header {
+            background: rgba(14, 22, 17, 0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .header-inner {
+            max-width: 1280px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+        }
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .hw-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700;
+            padding: 0.35rem 0.75rem; border-radius: 6px;
+            background: rgba(50, 184, 114, 0.12); color: var(--accent-cyan);
+            border: 1px solid rgba(50, 184, 114, 0.3);
+        }
+        .header-titles h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+        .header-titles p { font-size: 0.82rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; border-radius: 8px;
+            background: rgba(30, 45, 37, 0.8); border: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; transition: all 0.2s;
+        }
+        .back-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+        main { flex: 1; max-width: 1280px; width: 100%; margin: 2.25rem auto 4rem; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
+        .panel {
+            background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 2rem; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+            margin-bottom: 1.5rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border-color);
+        }
+        .panel-title { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 0.65rem; }
+        .panel-title i { color: var(--accent-cyan); }
+        .panel-badge {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent-cyan);
+            background: rgba(50, 184, 114, 0.1); border: 1px solid rgba(50, 184, 114, 0.3);
+            padding: 0.25rem 0.65rem; border-radius: 6px;
+        }
+
+        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem; }
+        p strong, li strong { color: var(--text-main); }
+        ul, ol { color: var(--text-muted); padding-left: 1.5rem; margin-bottom: 1rem; font-size: 0.95rem; }
+        li { margin-bottom: 0.45rem; }
+        
+        code {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: #E2ECE7;
+            background: rgba(14, 22, 17, 0.85); padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid var(--border-color);
+        }
+        pre {
+            background: #0e1611; border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 1.15rem; font-family: 'JetBrains Mono', monospace; font-size: 0.83rem;
+            color: var(--text-main); margin: 1rem 0; overflow-x: auto;
+        }
+        .highlight-code { color: var(--accent-cyan); font-weight: 600; }
+
+        .formula-banner {
+            background: rgba(14, 22, 17, 0.85); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-cyan);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0 1.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
+            color: var(--text-main); display: flex; flex-direction: column; gap: 0.85rem;
+        }
+        .math-line { color: var(--accent-cyan); font-weight: 600; }
+
+        .interactive-box { background: var(--bg-panel-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-top: 1.25rem; }
+        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+        .control-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        label { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+        input, select {
+            background: rgba(14, 22, 17, 0.95); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 0.65rem 0.9rem; color: var(--text-main); font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+            width: 100%; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(50, 184, 114, 0.2); }
+
+        .btn {
+            background: #32B872; color: #141F19; border: none; border-radius: 8px; padding: 0.65rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn:hover { filter: brightness(1.1); box-shadow: 0 0 16px rgba(50, 184, 114, 0.4); transform: translateY(-1px); }
+        .btn-secondary { background: rgba(20, 31, 25, 0.85); color: #E2ECE7; border: 1px solid var(--border-color); font-weight: 500; }
+        .btn-secondary:hover { border-color: #32B872; color: #32B872; box-shadow: none; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+        .kpi-card { background: #0e1611; border: 1px solid var(--border-color); border-radius: 10px; padding: 1.15rem; }
+        .kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; }
+        .kpi-value { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--accent-cyan); }
+        .kpi-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: var(--text-muted); margin-top: 0.35rem; border-top: 1px solid rgba(138, 154, 146, 0.15); padding-top: 0.35rem; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(540px, 1fr)); gap: 1.75rem; margin-top: 1.75rem; }
+        @media (max-width: 1150px) { .charts-grid { grid-template-columns: 1fr; } }
+        .chart-card { background: var(--bg-panel-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.35rem; display: flex; flex-direction: column; }
+        .chart-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.85rem; }
+        .chart-title { font-size: 0.98rem; font-weight: 600; color: var(--text-main); }
+        .chart-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+        .canvas-container { position: relative; width: 100%; background: #0e1611; border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; display: flex; justify-content: center; align-items: center; padding: 0.5rem; }
+        canvas { display: block; max-width: 100%; height: auto; }
+
+        .theory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-top: 1.25rem; }
+        .theory-card { background: var(--bg-panel-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.35rem; }
+        .theory-card h4 { font-size: 0.98rem; color: var(--accent-cyan); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        table.benchmark-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.88rem; }
+        table.benchmark-table th, table.benchmark-table td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        table.benchmark-table th { background: rgba(20, 31, 25, 0.9); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--accent-cyan); font-weight: 600; }
+        table.benchmark-table td { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        table.benchmark-table td:first-child { color: var(--text-main); font-weight: 500; }
+
+        footer { text-align: center; padding: 2.25rem 2rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; background: rgba(14, 22, 17, 0.95); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <div class="header-left">
+                <span class="hw-tag">HMWK 05</span>
+                <div class="header-titles">
+                    <h1>Riemann vs Lebesgue Integration &amp; Normal CDF Computation</h1>
+                    <p>Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+                </div>
+            </div>
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- EXERCISE 1: Riemann vs Lebesgue Integration -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-chart-area"></i> Ex 1. Riemann vs Lebesgue Numerical Integration</h2>
+                <span class="panel-badge">Domain Partitioning vs Range Partitioning</span>
+            </div>
+
+            <p>
+                Classical <strong>Riemann integration</strong> partitions the domain \([a, b]\) into subintervals \(\Delta x_i\) and sums vertical rectangles \(f(x_i^*)\Delta x_i\). In contrast, <strong>Lebesgue integration</strong> partitions the range (value set of \(f\)) into subintervals \([y_j, y_{j+1})\) and computes the total measure (length/volume) of their preimages in the domain: 
+                \(\int f \, d\mu \approx \sum y_j \cdot \mu(\{x \in [a,b] \mid y_j \le f(x) < y_{j+1}\})\).
+            </p>
+
+            <div class="theory-grid">
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-ruler-horizontal"></i> Riemann Definition (Domain Partition)</h4>
+                    <p>
+                        Partition domain \([a, b]\) into \(N\) subintervals:
+                        $$\int_a^b f(x)\,dx = \lim_{N \to \infty} \sum_{i=1}^N f(x_i^*) \Delta x$$
+                        Requires function continuity almost everywhere. Fails on highly discontinuous / dense sets (e.g., Dirichlet function).
+                    </p>
+                </div>
+                
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-layer-group"></i> Lebesgue Definition (Range Partition)</h4>
+                    <p>
+                        Partition image range \([y_{\min}, y_{\max}]\) into \(M\) slices \([y_j, y_{j+1})\):
+                        $$\int_E f\,d\mu = \lim_{M \to \infty} \sum_{j=0}^{M-1} y_j \cdot \mu(E_j), \quad E_j = f^{-1}([y_j, y_{j+1}))$$
+                        Measures set size \(\mu(E_j)\). Handles unbounded &amp; pathological functions cleanly.
+                    </p>
+                </div>
+            </div>
+
+            <div class="interactive-box">
+                <h3 style="font-size:1.05rem; margin-bottom:1rem; color:var(--text-main);"><i class="fa-solid fa-sliders"></i> Interactive Integration Simulator</h3>
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Select Function f(x)</label>
+                        <select id="funcSelect" onchange="runIntegrationSim()">
+                            <option value="sin">f(x) = sin(x), x ∈ [0, π]</option>
+                            <option value="x2">f(x) = x², x ∈ [0, 1]</option>
+                            <option value="step1">f(x) = 1 (x &lt; 0.5) else 3, x ∈ [0, 1]</option>
+                            <option value="abs">f(x) = |x - 0.5|, x ∈ [0, 1]</option>
+                            <option value="inv_sqrt">f(x) = 1 / √x, x ∈ (0, 1]</option>
+                            <option value="step2">f(x) = 1 (x &lt; 0.5) else 0, x ∈ [0, 1]</option>
+                            <option value="sinc">f(x) = sin(x) / x, x ∈ [0, π]</option>
+                            <option value="dirichlet">Pathological: Dirichlet f(x) (1 if Q, 0 if R\Q)</option>
+                            <option value="thomae">Pathological: Thomae's f(x) (1/q if p/q, 0 if R\Q)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Subdivisions / Partition Slices (N)</label>
+                        <input type="number" id="numSubdivisions" value="100" min="10" max="10000" onchange="runIntegrationSim()">
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Riemann Numerical Result</div>
+                        <div class="kpi-value" id="kpiRiemannVal">--</div>
+                        <div class="kpi-sub" id="kpiRiemannErr">Error: --</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Lebesgue Numerical Result</div>
+                        <div class="kpi-value" id="kpiLebesgueVal">--</div>
+                        <div class="kpi-sub" id="kpiLebesgueErr">Error: --</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Analytical / True Integral</div>
+                        <div class="kpi-value" id="kpiExactVal">--</div>
+                        <div class="kpi-sub" id="kpiStatus">Status: Riemann Integrable</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid" style="margin-top: 1.5rem;">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Riemann Domain Slicing Visualization</div>
+                                <div class="chart-sub">Vertical partition along X-axis</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasRiemann" width="560" height="260"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Lebesgue Range Slicing &amp; Preimages</div>
+                                <div class="chart-sub">Horizontal partition along Y-axis measure</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasLebesgue" width="560" height="260"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interactive-box" style="margin-top: 1.75rem;">
+                <h4 style="color: var(--accent-cyan); font-size: 0.98rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-microscope"></i> Convergence &amp; Pathological Case Analysis</h4>
+                <div style="overflow-x: auto;">
+                    <table class="benchmark-table">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>Domain [a,b]</th>
+                                <th>Riemann Status</th>
+                                <th>Lebesgue Status</th>
+                                <th>Convergence &amp; Behavior Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>\(f(x) = \sin(x)\)</td>
+                                <td>\([0, \pi]\)</td>
+                                <td>Integrable (\(= 2\))</td>
+                                <td>Integrable (\(= 2\))</td>
+                                <td>Both converge identically at \(O(N^{-2})\) rate.</td>
+                            </tr>
+                            <tr>
+                                <td>\(f(x) = x^2\)</td>
+                                <td>\([0, 1]\)</td>
+                                <td>Integrable (\(= 1/3\))</td>
+                                <td>Integrable (\(= 1/3\))</td>
+                                <td>Lebesgue requires computing preimages \(\sqrt{y}\). Smooth &amp; identical.</td>
+                            </tr>
+                            <tr>
+                                <td>\(f(x) = 1/\sqrt{x}\)</td>
+                                <td>\((0, 1]\)</td>
+                                <td>Improper Riemann (\(= 2\))</td>
+                                <td>Lebesgue Integrable (\(= 2\))</td>
+                                <td>Unbounded range. Riemann requires limit at \(0\); Lebesgue handles set measure naturally.</td>
+                            </tr>
+                            <tr>
+                                <td>Dirichlet Function</td>
+                                <td>\([0, 1]\)</td>
+                                <td><span style="color:#ef4444; font-weight:700;">NOT Integrable</span></td>
+                                <td>Integrable (\(= 0\))</td>
+                                <td>Riemann upper sum \(= 1\), lower sum \(= 0\). Lebesgue: \(\mu(\mathbb{Q}) = 0 \implies \int = 0\).</td>
+                            </tr>
+                            <tr>
+                                <td>Thomae's Function</td>
+                                <td>\([0, 1]\)</td>
+                                <td>Integrable (\(= 0\))</td>
+                                <td>Integrable (\(= 0\))</td>
+                                <td>Discontinuous at all rationals, continuous at irrationals. Measure of discontinuities \(= 0\).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- EXERCISE 2: Numerical Computation of Standard Normal CDF -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-wave-square"></i> Ex 2. Numerical Computation of the Normal CDF</h2>
+                <span class="panel-badge">Liouville's Theorem, Error Function &amp; Quadratures</span>
+            </div>
+
+            <p>
+                The Cumulative Distribution Function (CDF) of the standard normal distribution \(\mathcal{N}(0, 1)\) is defined as:
+                $$\Phi(x) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^x e^{-\frac{t^2}{2}} \, dt = \frac{1}{2} \left[ 1 + \text{erf}\left( \frac{x}{\sqrt{2}} \right) \right]$$
+            </p>
+
+            <div class="theory-grid">
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-lock"></i> Liouville's Theorem &amp; Non-Elementarity</h4>
+                    <p>
+                        By <strong>Liouville's Theorem</strong> in differential algebra, an elementary antiderivative of \(f(z) e^{g(z)}\) exists if and only if it can be written as \(h(z) e^{g(z)}\) for some elementary function \(h(z)\).
+                    </p>
+                    <p style="margin-bottom:0;">
+                        For \(e^{-t^2/2}\), no such elementary function \(h(t)\) exists. Hence, \(\Phi(x)\) <strong>cannot be expressed using standard elementary functions</strong> (polynomials, trig, exponentials, logs) and necessitates special functions like \(\text{erf}(x)\) or numerical integration.
+                    </p>
+                </div>
+                
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-gears"></i> Numerical Approximation Methods</h4>
+                    <p>
+                        Because real-time software cannot evaluate infinite integrals directly, we employ 3 primary numerical paradigms:
+                    </p>
+                    <ul>
+                        <li><strong>1. Numerical Quadrature:</strong> Simpson's Rule / Gauss-Legendre on finite truncated interval \([-8, x]\).</li>
+                        <li><strong>2. Power Series Expansion:</strong> Maclaurin expansion of \(\text{erf}(z) = \frac{2}{\sqrt{\pi}} \sum_{k=0}^\infty \frac{(-1)^k z^{2k+1}}{k! (2k+1)}\).</li>
+                        <li><strong>3. Rational Approximation:</strong> High-precision Cody / Abramowitz &amp; Stegun rational polynomials (accurate to \(10^{-15}\)).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="interactive-box">
+                <h3 style="font-size:1.05rem; margin-bottom:1rem; color:var(--text-main);"><i class="fa-solid fa-calculator"></i> Normal CDF Numerical Methods Evaluator</h3>
+                
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Evaluation Point (x)</label>
+                        <input type="number" id="cdfX" value="1.96" step="0.01" min="-5" max="5" onchange="evaluateCDFMethods()">
+                    </div>
+                    <div class="control-group">
+                        <label>Integration / Series Steps (N)</label>
+                        <input type="number" id="cdfN" value="100" min="10" max="2000" onchange="evaluateCDFMethods()">
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Reference Standard Φ(x)</div>
+                        <div class="kpi-value" id="cdfRefVal">--</div>
+                        <div class="kpi-sub">Hart/Cody High-Precision Reference</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Simpson's Quadrature</div>
+                        <div class="kpi-value" id="cdfSimpVal">--</div>
+                        <div class="kpi-sub" id="cdfSimpErr">Error: --</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">erf(x) Power Series</div>
+                        <div class="kpi-value" id="cdfSeriesVal">--</div>
+                        <div class="kpi-sub" id="cdfSeriesErr">Error: --</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Abramowitz &amp; Stegun Rational</div>
+                        <div class="kpi-value" id="cdfRationalVal">--</div>
+                        <div class="kpi-sub" id="cdfRationalErr">Error: --</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid" style="margin-top: 1.5rem;">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Standard Normal Bell Curve PDF &amp; Integrated Area Φ(x)</div>
+                                <div class="chart-sub">Shaded region represents cumulative probability P(Z ≤ x)</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasPDF" width="560" height="260"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Absolute Numerical Error vs. Reference</div>
+                                <div class="chart-sub">Logarithmic scale comparison across methods</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvasError" width="560" height="260"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; overflow-x: auto;">
+                    <h4 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 0.75rem;"><i class="fa-solid fa-table-list"></i> Benchmark Table Across Standard Z-Scores</h4>
+                    <table class="benchmark-table" id="cdfBenchTable">
+                        <thead>
+                            <tr>
+                                <th>Z-Score (x)</th>
+                                <th>Reference Φ(x)</th>
+                                <th>Simpson's (N=100)</th>
+                                <th>Power Series (k=15)</th>
+                                <th>A&amp;S Rational Approx</th>
+                                <th>Max Method Error</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cdfBenchBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Tommaso Cenciotti &bull; Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+    </footer>
+
+    <script>
+        // --- EXERCISE 1 LOGIC ---
+        function evalFunction(funcType, x) {
+            switch(funcType) {
+                case 'sin': return Math.sin(x);
+                case 'x2': return x * x;
+                case 'step1': return x < 0.5 ? 1.0 : 3.0;
+                case 'abs': return Math.abs(x - 0.5);
+                case 'inv_sqrt': return x <= 0 ? 0 : 1.0 / Math.sqrt(x);
+                case 'step2': return x < 0.5 ? 1.0 : 0.0;
+                case 'sinc': return Math.abs(x) < 1e-7 ? 1.0 : Math.sin(x) / x;
+                case 'dirichlet': 
+                    return isPseudoRational(x) ? 1.0 : 0.0;
+                case 'thomae':
+                    let q = getRationalDenominator(x);
+                    return q > 0 ? 1.0 / q : 0.0;
+                default: return Math.sin(x);
+            }
+        }
+
+        function getDomain(funcType) {
+            if (funcType === 'sin' || funcType === 'sinc') return [0, Math.PI];
+            return [0, 1];
+        }
+
+        function getExactIntegral(funcType) {
+            switch(funcType) {
+                case 'sin': return 2.0;
+                case 'x2': return 1.0 / 3.0;
+                case 'step1': return 2.0;
+                case 'abs': return 0.25;
+                case 'inv_sqrt': return 2.0;
+                case 'step2': return 0.5;
+                case 'sinc': return 1.851937051982466;
+                case 'dirichlet': return 0.0;
+                case 'thomae': return 0.0;
+                default: return 2.0;
+            }
+        }
+
+        function isPseudoRational(x) {
+            for (let q = 1; q <= 50; q++) {
+                let p = Math.round(x * q);
+                if (Math.abs(x - p / q) < 1e-5) return true;
+            }
+            return false;
+        }
+
+        function getRationalDenominator(x) {
+            for (let q = 1; q <= 40; q++) {
+                let p = Math.round(x * q);
+                if (Math.abs(x - p / q) < 1e-5) return q;
+            }
+            return 0;
+        }
+
+        function computeRiemann(funcType, a, b, N) {
+            let dx = (b - a) / N;
+            let sum = 0;
+            for (let i = 0; i < N; i++) {
+                let x_mid = a + (i + 0.5) * dx;
+                sum += evalFunction(funcType, x_mid);
+            }
+            return sum * dx;
+        }
+
+        function computeLebesgue(funcType, a, b, M) {
+            let sampleN = 2000;
+            let dx = (b - a) / sampleN;
+            let yVals = [];
+            for (let i = 0; i <= sampleN; i++) {
+                let x = a + i * dx;
+                let y = evalFunction(funcType, x);
+                if (isFinite(y)) yVals.push(y);
+            }
+            if (yVals.length === 0) return 0;
+            
+            let yMin = Math.min(...yVals);
+            let yMax = Math.max(...yVals);
+            if (Math.abs(yMax - yMin) < 1e-9) return yMin * (b - a);
+
+            let dy = (yMax - yMin) / M;
+            let total = 0;
+            for (let j = 0; j < M; j++) {
+                let y_lower = yMin + j * dy;
+                let y_upper = y_lower + dy;
+                let y_mid = y_lower + 0.5 * dy;
+                
+                let count = 0;
+                for (let k = 0; k < yVals.length; k++) {
+                    if (yVals[k] >= y_lower && (j === M - 1 ? yVals[k] <= y_upper : yVals[k] < y_upper)) {
+                        count++;
+                    }
+                }
+                let measure = (count / yVals.length) * (b - a);
+                total += y_mid * measure;
+            }
+            return total;
+        }
+
+        function runIntegrationSim() {
+            let funcType = document.getElementById('funcSelect').value;
+            let N = parseInt(document.getElementById('numSubdivisions').value, 10) || 100;
+            let [a, b] = getDomain(funcType);
+            let exact = getExactIntegral(funcType);
+
+            let riemannVal = computeRiemann(funcType, a, b, N);
+            let lebesgueVal = computeLebesgue(funcType, a, b, N);
+
+            let rErr = Math.abs(riemannVal - exact);
+            let lErr = Math.abs(lebesgueVal - exact);
+
+            document.getElementById('kpiRiemannVal').innerText = riemannVal.toFixed(6);
+            document.getElementById('kpiRiemannErr').innerText = `Error: ${rErr.toExponential(3)}`;
+
+            document.getElementById('kpiLebesgueVal').innerText = lebesgueVal.toFixed(6);
+            document.getElementById('kpiLebesgueErr').innerText = `Error: ${lErr.toExponential(3)}`;
+
+            document.getElementById('kpiExactVal').innerText = exact.toFixed(6);
+
+            let statusEl = document.getElementById('kpiStatus');
+            if (funcType === 'dirichlet') {
+                statusEl.innerText = "Non-Riemann Integrable! (Lebesgue = 0)";
+                statusEl.style.color = "#ef4444";
+            } else {
+                statusEl.innerText = "Riemann Integrable";
+                statusEl.style.color = "var(--text-muted)";
+            }
+
+            drawRiemannCanvas(funcType, a, b, N);
+            drawLebesgueCanvas(funcType, a, b, N);
+        }
+
+        function drawRiemannCanvas(funcType, a, b, N) {
+            const canvas = document.getElementById('canvasRiemann');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0e1611'; ctx.fillRect(0, 0, W, H);
+
+            let pad = 35;
+            let plotW = W - 2 * pad, plotH = H - 2 * pad;
+            
+            ctx.strokeStyle = 'rgba(138, 154, 146, 0.3)'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pad, H - pad); ctx.lineTo(W - pad, H - pad);
+            ctx.moveTo(pad, pad); ctx.lineTo(pad, H - pad);
+            ctx.stroke();
+
+            let displayN = Math.min(N, 60);
+            let dx = (b - a) / displayN;
+            
+            let yMax = 1.2;
+            if (funcType === 'step1') yMax = 3.5;
+            if (funcType === 'inv_sqrt') yMax = 5.0;
+
+            for (let i = 0; i < displayN; i++) {
+                let x_mid = a + (i + 0.5) * dx;
+                let y = evalFunction(funcType, x_mid);
+                if (y > yMax) y = yMax;
+
+                let px = pad + (i / displayN) * plotW;
+                let pw = plotW / displayN;
+                let ph = (y / yMax) * plotH;
+                let py = H - pad - ph;
+
+                ctx.fillStyle = 'rgba(50, 184, 114, 0.25)';
+                ctx.strokeStyle = 'rgba(50, 184, 114, 0.7)';
+                ctx.fillRect(px, py, pw, ph);
+                ctx.strokeRect(px, py, pw, ph);
+            }
+
+            ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            let steps = 200;
+            for (let i = 0; i <= steps; i++) {
+                let x = a + (i / steps) * (b - a);
+                let y = evalFunction(funcType, x);
+                if (y > yMax) y = yMax;
+                let px = pad + (i / steps) * plotW;
+                let py = H - pad - (y / yMax) * plotH;
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        function drawLebesgueCanvas(funcType, a, b, N) {
+            const canvas = document.getElementById('canvasLebesgue');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0e1611'; ctx.fillRect(0, 0, W, H);
+
+            let pad = 35;
+            let plotW = W - 2 * pad, plotH = H - 2 * pad;
+            
+            ctx.strokeStyle = 'rgba(138, 154, 146, 0.3)'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pad, H - pad); ctx.lineTo(W - pad, H - pad);
+            ctx.moveTo(pad, pad); ctx.lineTo(pad, H - pad);
+            ctx.stroke();
+
+            let yMax = 1.2;
+            if (funcType === 'step1') yMax = 3.5;
+            if (funcType === 'inv_sqrt') yMax = 5.0;
+
+            let M = 15;
+            let dy = yMax / M;
+
+            for (let j = 0; j < M; j++) {
+                let yVal = j * dy;
+                let py = H - pad - (yVal / yMax) * plotH;
+                let ph = (dy / yMax) * plotH;
+
+                ctx.fillStyle = j % 2 === 0 ? 'rgba(50, 184, 114, 0.12)' : 'rgba(16, 185, 129, 0.22)';
+                ctx.fillRect(pad, py - ph, plotW, ph);
+                
+                ctx.strokeStyle = 'rgba(50, 184, 114, 0.3)';
+                ctx.beginPath(); ctx.moveTo(pad, py); ctx.lineTo(W - pad, py); ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#32B872'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            let steps = 200;
+            for (let i = 0; i <= steps; i++) {
+                let x = a + (i / steps) * (b - a);
+                let y = evalFunction(funcType, x);
+                if (y > yMax) y = yMax;
+                let px = pad + (i / steps) * plotW;
+                let py = H - pad - (y / yMax) * plotH;
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        // --- EXERCISE 2 LOGIC ---
+        function normalPDF(t) {
+            return (1.0 / Math.sqrt(2.0 * Math.PI)) * Math.exp(-0.5 * t * t);
+        }
+
+        function referenceNormalCDF(x) {
+            let z = Math.abs(x);
+            let p = 0.0;
+            if (z > 37.0) {
+                p = 0.0;
+            } else {
+                let expTerm = Math.exp(-0.5 * z * z);
+                if (z < 7.071067811865475) {
+                    let n = (((((3.5233877e-2 * z + 0.3813152136) * z + 1.715858094) * z + 3.417248455) * z + 3.265535394) * z + 1.6370678) * z + 1.0;
+                    let d = ((((((2.1170562e-2 * z + 0.2172307033) * z + 1.202767094) * z + 3.723201923) * z + 6.841218861) * z + 7.592492645) * z + 4.82198028) * z + 1.0;
+                    p = expTerm * n / d;
+                } else {
+                    let n = (((3.5233877e-2 * z + 0.3813152136) * z + 1.715858094) * z + 3.417248455) * z + 3.265535394;
+                    let d = (((2.1170562e-2 * z + 0.2172307033) * z + 1.202767094) * z + 3.723201923) * z + 6.841218861;
+                    p = expTerm * n / (d * z);
+                }
+            }
+            return x <= 0 ? 0.5 * p : 1.0 - 0.5 * p;
+        }
+
+        function simpsonNormalCDF(x, N) {
+            if (x < -8.0) return 0.0;
+            if (x > 8.0) return 1.0;
+            let a = -8.0;
+            let b = x;
+            if (N % 2 !== 0) N++;
+            let h = (b - a) / N;
+            let sum = normalPDF(a) + normalPDF(b);
+            for (let i = 1; i < N; i++) {
+                let t = a + i * h;
+                sum += (i % 2 === 0 ? 2.0 : 4.0) * normalPDF(t);
+            }
+            return sum * (h / 3.0);
+        }
+
+        function seriesNormalCDF(x, terms = 25) {
+            let z = x / Math.sqrt(2.0);
+            let sum = 0.0;
+            let term = z;
+            sum += term;
+            for (let k = 1; k < terms; k++) {
+                term *= - (z * z) / k;
+                sum += term / (2 * k + 1);
+            }
+            let erfVal = (2.0 / Math.sqrt(Math.PI)) * sum;
+            return 0.5 * (1.0 + erfVal);
+        }
+
+        function abramowitzStegunCDF(x) {
+            let sign = x < 0 ? -1 : 1;
+            let z = Math.abs(x) / Math.sqrt(2.0);
+            let t = 1.0 / (1.0 + 0.3275911 * z);
+            let poly = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+            let erfVal = sign * (1.0 - poly * Math.exp(-z * z));
+            return 0.5 * (1.0 + erfVal);
+        }
+
+        function evaluateCDFMethods() {
+            let x = parseFloat(document.getElementById('cdfX').value);
+            if (isNaN(x)) x = 1.96;
+            let N = parseInt(document.getElementById('cdfN').value, 10) || 100;
+
+            let ref = referenceNormalCDF(x);
+            let simp = simpsonNormalCDF(x, N);
+            let series = seriesNormalCDF(x, Math.min(N, 40));
+            let abram = abramowitzStegunCDF(x);
+
+            document.getElementById('cdfRefVal').innerText = ref.toFixed(7);
+            
+            document.getElementById('cdfSimpVal').innerText = simp.toFixed(7);
+            document.getElementById('cdfSimpErr').innerText = `Error: ${Math.abs(simp - ref).toExponential(3)}`;
+
+            document.getElementById('cdfSeriesVal').innerText = series.toFixed(7);
+            document.getElementById('cdfSeriesErr').innerText = `Error: ${Math.abs(series - ref).toExponential(3)}`;
+
+            document.getElementById('cdfRationalVal').innerText = abram.toFixed(7);
+            document.getElementById('cdfRationalErr').innerText = `Error: ${Math.abs(abram - ref).toExponential(3)}`;
+
+            drawPDFCanvas(x);
+            drawErrorCanvas(N);
+            populateCDFBenchTable();
+        }
+
+        function drawPDFCanvas(cutoffX) {
+            const canvas = document.getElementById('canvasPDF');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0e1611'; ctx.fillRect(0, 0, W, H);
+
+            let pad = 35;
+            let plotW = W - 2 * pad, plotH = H - 2 * pad;
+            let xMin = -4.0, xMax = 4.0;
+            let yMin = 0.0, yMax = 0.45;
+
+            let xToPx = (val) => pad + ((val - xMin) / (xMax - xMin)) * plotW;
+            let yToPx = (val) => H - pad - ((val - yMin) / (yMax - yMin)) * plotH;
+
+            ctx.fillStyle = 'rgba(50, 184, 114, 0.25)';
+            ctx.beginPath();
+            ctx.moveTo(xToPx(xMin), yToPx(0));
+            let steps = 150;
+            for (let i = 0; i <= steps; i++) {
+                let curX = xMin + (i / steps) * (cutoffX - xMin);
+                if (curX > xMax) curX = xMax;
+                let curY = normalPDF(curX);
+                ctx.lineTo(xToPx(curX), yToPx(curY));
+            }
+            ctx.lineTo(xToPx(Math.min(cutoffX, xMax)), yToPx(0));
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i <= steps; i++) {
+                let curX = xMin + (i / steps) * (xMax - xMin);
+                let curY = normalPDF(curX);
+                let px = xToPx(curX), py = yToPx(curY);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            let cutoffPx = xToPx(cutoffX);
+            ctx.strokeStyle = '#eab308'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(cutoffPx, pad); ctx.lineTo(cutoffPx, H - pad); ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#8A9A92'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+            ctx.fillText('-4', xToPx(-4), H - 12);
+            ctx.fillText('0', xToPx(0), H - 12);
+            ctx.fillText('4', xToPx(4), H - 12);
+            ctx.fillText(`x = ${cutoffX.toFixed(2)}`, cutoffPx, pad - 8);
+        }
+
+        function drawErrorCanvas(N) {
+            const canvas = document.getElementById('canvasError');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0e1611'; ctx.fillRect(0, 0, W, H);
+
+            let pad = 40;
+            let plotW = W - 2 * pad, plotH = H - 2 * pad;
+            let zSteps = 50;
+
+            let simpErrs = [], seriesErrs = [], abramErrs = [];
+            for (let i = 0; i <= zSteps; i++) {
+                let z = -3.0 + (i / zSteps) * 6.0;
+                let ref = referenceNormalCDF(z);
+                simpErrs.push({z: z, err: Math.max(1e-15, Math.abs(simpsonNormalCDF(z, N) - ref))});
+                seriesErrs.push({z: z, err: Math.max(1e-15, Math.abs(seriesNormalCDF(z, Math.min(N, 25)) - ref))});
+                abramErrs.push({z: z, err: Math.max(1e-15, Math.abs(abramowitzStegunCDF(z) - ref))});
+            }
+
+            let logMin = -15, logMax = -1;
+            let xToPx = (val) => pad + ((val - (-3.0)) / 6.0) * plotW;
+            let yToPx = (errVal) => {
+                let logVal = Math.log10(errVal);
+                if (logVal < logMin) logVal = logMin;
+                return pad + ((logMax - logVal) / (logMax - logMin)) * plotH;
+            };
+
+            ctx.strokeStyle = 'rgba(138, 154, 146, 0.15)'; ctx.lineWidth = 1;
+            for (let l = -15; l <= -1; l += 3) {
+                let py = yToPx(Math.pow(10, l));
+                ctx.beginPath(); ctx.moveTo(pad, py); ctx.lineTo(W - pad, py); ctx.stroke();
+                ctx.fillStyle = '#8A9A92'; ctx.font = '9px JetBrains Mono'; ctx.textAlign = 'right';
+                ctx.fillText(`10^${l}`, pad - 5, py + 3);
+            }
+
+            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 1.5; ctx.beginPath();
+            simpErrs.forEach((pt, i) => {
+                let px = xToPx(pt.z), py = yToPx(pt.err);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1.5; ctx.beginPath();
+            seriesErrs.forEach((pt, i) => {
+                let px = xToPx(pt.z), py = yToPx(pt.err);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            ctx.strokeStyle = '#32B872'; ctx.lineWidth = 1.5; ctx.beginPath();
+            abramErrs.forEach((pt, i) => {
+                let px = xToPx(pt.z), py = yToPx(pt.err);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+        }
+
+        function populateCDFBenchTable() {
+            let zScores = [-2.58, -1.96, -1.0, 0.0, 1.0, 1.96, 2.58];
+            let tbody = document.getElementById('cdfBenchBody');
+            tbody.innerHTML = '';
+
+            zScores.forEach(z => {
+                let ref = referenceNormalCDF(z);
+                let simp = simpsonNormalCDF(z, 100);
+                let series = seriesNormalCDF(z, 20);
+                let abram = abramowitzStegunCDF(z);
+
+                let maxErr = Math.max(Math.abs(simp - ref), Math.abs(series - ref), Math.abs(abram - ref));
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>Z = ${z > 0 ? '+' + z.toFixed(2) : z.toFixed(2)}</strong></td>
+                    <td>${ref.toFixed(7)}</td>
+                    <td>${simp.toFixed(7)}</td>
+                    <td>${series.toFixed(7)}</td>
+                    <td>${abram.toFixed(7)}</td>
+                    <td style="color:var(--accent-cyan); font-weight:600;">${maxErr.toExponential(3)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.onload = () => {
+            runIntegrationSim();
+            evaluateCDFMethods();
+        };
+    </script>
+</body>
+</html>
