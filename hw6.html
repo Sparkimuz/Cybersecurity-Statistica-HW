@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMWK 06 — Statistical Independence: Contingency Tables &amp; Chi-Square Test | Tommaso Cenciotti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #141F19;
+            --bg-card: #1E2D25;
+            --bg-panel-inner: rgba(20, 31, 25, 0.75);
+            --text-main: #E2ECE7;
+            --text-muted: #8A9A92;
+            --accent-cyan: #32B872;
+            --accent-secondary: #4ade80;
+            --accent-warn: #eab308;
+            --accent-red: #ef4444;
+            --border-color: rgba(138, 154, 146, 0.25);
+            --border-glow: rgba(50, 184, 114, 0.35);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.65;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(circle at 12% 15%, rgba(50, 184, 114, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 88% 28%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+        }
+        a { text-decoration: none; color: inherit; }
+
+        header {
+            background: rgba(14, 22, 17, 0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .header-inner {
+            max-width: 1280px; margin: 0 auto;
+            display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+        }
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .hw-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700;
+            padding: 0.35rem 0.75rem; border-radius: 6px;
+            background: rgba(50, 184, 114, 0.12); color: var(--accent-cyan);
+            border: 1px solid rgba(50, 184, 114, 0.3);
+        }
+        .header-titles h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+        .header-titles p { font-size: 0.82rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; border-radius: 8px;
+            background: rgba(30, 45, 37, 0.8); border: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; transition: all 0.2s;
+        }
+        .back-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+        main { flex: 1; max-width: 1280px; width: 100%; margin: 2.25rem auto 4rem; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
+        .panel {
+            background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 2rem; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+            margin-bottom: 1.5rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border-color);
+        }
+        .panel-title { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 0.65rem; }
+        .panel-title i { color: var(--accent-cyan); }
+        .panel-badge {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent-cyan);
+            background: rgba(50, 184, 114, 0.1); border: 1px solid rgba(50, 184, 114, 0.3);
+            padding: 0.25rem 0.65rem; border-radius: 6px;
+        }
+
+        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1rem; }
+        p strong, li strong { color: var(--text-main); }
+        ul, ol { color: var(--text-muted); padding-left: 1.5rem; margin-bottom: 1rem; font-size: 0.95rem; }
+        li { margin-bottom: 0.45rem; }
+
+        code {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: #E2ECE7;
+            background: rgba(14, 22, 17, 0.85); padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid var(--border-color);
+        }
+        pre {
+            background: #0e1611; border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 1.15rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+            color: var(--text-main); margin: 1rem 0 0; overflow-x: auto; line-height: 1.55;
+        }
+        pre .cm { color: #6b7f74; }
+        pre .kw { color: var(--accent-cyan); font-weight: 600; }
+
+        .formula-banner {
+            background: rgba(14, 22, 17, 0.85); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-cyan);
+            border-radius: 8px; padding: 1.25rem; margin: 1rem 0 1.25rem; font-size: 0.92rem;
+            color: var(--text-main); display: flex; flex-direction: column; gap: 0.6rem; overflow-x: auto;
+        }
+
+        .interactive-box { background: var(--bg-panel-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-top: 1.25rem; }
+        .box-title { font-size: 1.05rem; margin-bottom: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; }
+        .box-title i { color: var(--accent-cyan); }
+        .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+        .control-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .control-group.wide { grid-column: span 2; }
+        @media (max-width: 680px) { .control-group.wide { grid-column: span 1; } }
+        label { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+        input, select, textarea {
+            background: rgba(14, 22, 17, 0.95); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 0.65rem 0.9rem; color: var(--text-main); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+            width: 100%; transition: border-color 0.2s;
+        }
+        textarea { min-height: 140px; resize: vertical; line-height: 1.45; }
+        input[type="range"] { padding: 0; accent-color: var(--accent-cyan); height: 2.4rem; background: transparent; border: none; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(50, 184, 114, 0.2); }
+        .hidden { display: none !important; }
+
+        .btn {
+            background: #32B872; color: #141F19; border: none; border-radius: 8px; padding: 0.65rem 1.25rem;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn:hover { filter: brightness(1.1); box-shadow: 0 0 16px rgba(50, 184, 114, 0.4); transform: translateY(-1px); }
+        .btn-secondary { background: rgba(20, 31, 25, 0.85); color: #E2ECE7; border: 1px solid var(--border-color); font-weight: 500; }
+        .btn-secondary:hover { border-color: #32B872; color: #32B872; box-shadow: none; }
+        .btn-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+        .kpi-card { background: #0e1611; border: 1px solid var(--border-color); border-radius: 10px; padding: 1.15rem; }
+        .kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem; }
+        .kpi-value { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--accent-cyan); }
+        .kpi-value.warn { color: var(--accent-warn); }
+        .kpi-value.bad { color: var(--accent-red); }
+        .kpi-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-muted); margin-top: 0.35rem; border-top: 1px solid rgba(138, 154, 146, 0.15); padding-top: 0.35rem; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(540px, 1fr)); gap: 1.75rem; margin-top: 1.75rem; }
+        @media (max-width: 1150px) { .charts-grid { grid-template-columns: 1fr; } }
+        .chart-card { background: var(--bg-panel-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.35rem; display: flex; flex-direction: column; }
+        .chart-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.85rem; }
+        .chart-title { font-size: 0.98rem; font-weight: 600; color: var(--text-main); }
+        .chart-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+        .canvas-container { position: relative; width: 100%; background: #0e1611; border-radius: 8px; border: 1px solid var(--border-color); overflow: hidden; display: flex; justify-content: center; align-items: center; padding: 0.5rem; }
+        canvas { display: block; max-width: 100%; height: auto; }
+        .legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin-top: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); }
+        .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+        .legend i.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+        .theory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-top: 1.25rem; }
+        .theory-grid.two { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 900px) { .theory-grid.two { grid-template-columns: 1fr; } }
+        .theory-card { background: var(--bg-panel-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.35rem; }
+        .theory-card h4 { font-size: 0.98rem; color: var(--accent-cyan); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem; }
+        .theory-card p:last-child, .theory-card ul:last-child { margin-bottom: 0; }
+
+        .tab-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.5rem 0 0.75rem; }
+        .tab-btn {
+            background: rgba(14, 22, 17, 0.85); color: var(--text-muted); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 0.45rem 0.85rem; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--text-main); border-color: var(--accent-cyan); }
+        .tab-btn.active { background: rgba(50, 184, 114, 0.14); color: var(--accent-cyan); border-color: rgba(50, 184, 114, 0.45); font-weight: 700; }
+        .tab-caption { font-size: 0.85rem; margin: 0.25rem 0 0.5rem; }
+
+        .table-wrap { overflow-x: auto; }
+        table.benchmark-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.86rem; }
+        table.benchmark-table th, table.benchmark-table td { padding: 0.7rem 0.9rem; text-align: right; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+        table.benchmark-table th { background: rgba(20, 31, 25, 0.9); font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: var(--accent-cyan); font-weight: 600; }
+        table.benchmark-table th:first-child, table.benchmark-table td:first-child { text-align: left; }
+        table.benchmark-table td { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        table.benchmark-table td:first-child { color: var(--text-main); font-weight: 500; }
+        table.benchmark-table tr.total-row td { color: var(--text-main); border-top: 1px solid rgba(50, 184, 114, 0.45); background: rgba(50, 184, 114, 0.05); }
+        table.benchmark-table td.total-col { color: var(--text-main); border-left: 1px solid rgba(50, 184, 114, 0.45); background: rgba(50, 184, 114, 0.05); }
+        table.benchmark-table td.lowE { color: var(--accent-warn); font-weight: 700; }
+        table.benchmark-table.static td, table.benchmark-table.static th { white-space: normal; text-align: left; }
+
+        .verdict {
+            border-radius: 10px; padding: 1.15rem 1.25rem; margin-top: 1.5rem; border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-cyan); background: #0e1611;
+        }
+        .verdict.dep { border-left-color: var(--accent-red); }
+        .verdict.border { border-left-color: var(--accent-warn); }
+        .verdict h4 { font-size: 0.98rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main); }
+        .verdict p { margin-bottom: 0.5rem; }
+        .verdict p:last-child { margin-bottom: 0; }
+        .note { font-size: 0.85rem; }
+        .warn-text { color: var(--accent-warn); }
+
+        footer { text-align: center; padding: 2.25rem 2rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; background: rgba(14, 22, 17, 0.95); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <div class="header-left">
+                <span class="hw-tag">HMWK 06</span>
+                <div class="header-titles">
+                    <h1>Statistical Independence: Contingency Tables &amp; Pearson's &chi;&sup2; Test</h1>
+                    <p>Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+                </div>
+            </div>
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- ============================================================ -->
+        <!-- EX 1: THEORY                                                  -->
+        <!-- ============================================================ -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-book-open"></i> Ex 1. Independence in Probability and in Statistics</h2>
+                <span class="panel-badge">Joint = Product of Marginals</span>
+            </div>
+
+            <p>
+                Given a bivariate dataset of \(n\) paired observations \((x_k, y_k)\), where \(X\) takes the categories \(a_1,\dots,a_r\) and \(Y\) the categories \(b_1,\dots,b_c\),
+                the <strong>contingency table</strong> collects the joint absolute frequencies \(n_{ij} = \#\{k : x_k = a_i,\ y_k = b_j\}\).
+                Summing along rows and columns gives the <strong>marginal</strong> frequencies \(n_{i\cdot} = \sum_j n_{ij}\) and \(n_{\cdot j} = \sum_i n_{ij}\), with \(\sum_{i,j} n_{ij} = n\).
+                The question of this homework is whether knowing the value of \(X\) tells us anything about \(Y\).
+            </p>
+
+            <div class="theory-grid two">
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-dice"></i> Probabilistic Independence</h4>
+                    <p>Two events are independent when the occurrence of one does not change the probability of the other:</p>
+                    $$P(A \cap B) = P(A)\,P(B) \iff P(A \mid B) = P(A) \quad (P(B) > 0)$$
+                    <p>Two random variables are independent when <em>every</em> pair of events they generate is independent, i.e. the joint law factorises:</p>
+                    $$F_{X,Y}(x,y) = F_X(x)\,F_Y(y) \quad \forall\, x,y$$
+                    <p>For discrete variables this is \(p_{ij} = P(X=a_i, Y=b_j) = p_{i\cdot}\, p_{\cdot j}\) for all \(i, j\); for continuous ones, \(f_{X,Y}(x,y) = f_X(x) f_Y(y)\).</p>
+                </div>
+
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-table-cells"></i> Statistical (Empirical) Independence</h4>
+                    <p>On observed data, \(X\) and \(Y\) are <strong>statistically independent</strong> if the relative joint frequency equals the product of the relative marginals:</p>
+                    $$\frac{n_{ij}}{n} = \frac{n_{i\cdot}}{n}\cdot\frac{n_{\cdot j}}{n} \iff n_{ij} = \frac{n_{i\cdot}\, n_{\cdot j}}{n}$$
+                    <p>Equivalently, all the <strong>conditional distributions are identical</strong> and equal to the marginal one:</p>
+                    $$f_{j\mid i} = \frac{n_{ij}}{n_{i\cdot}} = \frac{n_{\cdot j}}{n} \;\;\forall i, \qquad f_{i\mid j} = \frac{n_{ij}}{n_{\cdot j}} = \frac{n_{i\cdot}}{n} \;\;\forall j$$
+                    <p>The empirical frequencies are estimators of the probabilities (by the LLN, see HMWK 03, \(n_{ij}/n \to p_{ij}\)), so exact empirical independence is almost never observed even when the variables are truly independent: we need a <strong>test</strong> that measures how far we are from it.</p>
+                </div>
+
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-scale-balanced"></i> Expected Frequencies &amp; Pearson's &chi;&sup2;</h4>
+                    <p>Under \(H_0\): "\(X\) and \(Y\) are independent", the <strong>expected frequencies</strong> are \(\hat n_{ij} = n_{i\cdot}\, n_{\cdot j} / n\). Pearson's statistic adds up the normalised squared discrepancies:</p>
+                    $$\chi^2 = \sum_{i=1}^{r}\sum_{j=1}^{c} \frac{(n_{ij} - \hat n_{ij})^2}{\hat n_{ij}} \;\xrightarrow{d}\; \chi^2_{(r-1)(c-1)}$$
+                    <p>\(\chi^2 = 0\) means perfect empirical independence. The degrees of freedom are \((r-1)(c-1)\): the free cells once both margins are fixed. The approximation is reliable when all \(\hat n_{ij} \ge 5\) (Cochran's rule).</p>
+                </div>
+
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-percent"></i> p-value, Decision &amp; Effect Size</h4>
+                    <p>The <strong>p-value</strong> is the probability, under \(H_0\), of a statistic at least as extreme as the observed one. It is the upper tail of the \(\chi^2_\nu\) distribution, which is a regularised incomplete Gamma function (no elementary closed form, just like \(\Phi\) in HMWK 05):</p>
+                    $$p = P(\chi^2_\nu \ge \chi^2_{obs}) = Q\!\left(\tfrac{\nu}{2}, \tfrac{\chi^2_{obs}}{2}\right) = \frac{\Gamma(\nu/2,\ \chi^2_{obs}/2)}{\Gamma(\nu/2)}$$
+                    <p>If \(p < \alpha\) we reject independence. Since \(\chi^2\) grows with \(n\), its size is normalised by <strong>Cramér's V</strong> \(= \sqrt{\chi^2 / (n \cdot \min(r-1, c-1))} \in [0,1]\), which measures the <em>strength</em> of the association.</p>
+                </div>
+            </div>
+
+            <div class="formula-banner">
+                <div><strong>Independence &rArr; zero covariance, but not the converse.</strong> Covariance only detects <em>linear</em> association. If \(X\) is uniform on \(\{-1, 0, 1\}\) and \(Y = X^2\), then \(\operatorname{Cov}(X,Y) = E[X^3] - E[X]E[X^2] = 0\), yet \(Y\) is a deterministic function of \(X\): \(P(Y=0 \mid X=0) = 1 \ne P(Y=0) = 1/3\). The &chi;&sup2; test works on the whole joint distribution, so it catches this dependence (dataset &#9316; in the analyser below).</div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- EX 2: ANALYSER                                                -->
+        <!-- ============================================================ -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-table"></i> Ex 2. Contingency Table Analyser</h2>
+                <span class="panel-badge">Frequencies &bull; Expected &bull; &chi;&sup2; &bull; p-value</span>
+            </div>
+
+            <p>
+                Every table below is built <strong>programmatically</strong> from the raw list of observations: the program reads the pairs \((x_k, y_k)\) one by one, discovers the categories, counts the joint occurrences and then derives marginals, conditional distributions, expected counts, &chi;&sup2; and p-value.
+                The main dataset is the <strong>Child Smokers</strong> dataset from the course material (654 children: age, height, lung capacity FEV, sex, smoking status); a synthetic <strong>IDS log</strong> generator gives a cybersecurity scenario with tunable dependence, and any CSV can be pasted.
+            </p>
+
+            <div class="interactive-box">
+                <h3 class="box-title"><i class="fa-solid fa-sliders"></i> Dataset &amp; Test Settings</h3>
+                <div class="controls-grid">
+                    <div class="control-group wide">
+                        <label for="datasetSelect">Bivariate dataset (X, Y)</label>
+                        <select id="datasetSelect">
+                            <option value="sexSmoke">&#9312; Child Smokers — Sex × Smoking status (n = 654)</option>
+                            <option value="ageSmoke">&#9313; Child Smokers — Age class × Smoking status (n = 654)</option>
+                            <option value="smokeFev">&#9314; Child Smokers — Smoking status × FEV class (n = 654)</option>
+                            <option value="ids">&#9315; Synthetic IDS log — Protocol × Alert level (tunable)</option>
+                            <option value="square">&#9316; Uncorrelated but dependent — X uniform on {−1,0,1}, Y = X²</option>
+                            <option value="custom">&#9317; Custom — paste your own CSV</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="alphaSelect">Significance level α</label>
+                        <select id="alphaSelect">
+                            <option value="0.10">α = 0.10</option>
+                            <option value="0.05" selected>α = 0.05</option>
+                            <option value="0.01">α = 0.01</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- IDS controls -->
+                <div id="idsControls" class="controls-grid hidden">
+                    <div class="control-group">
+                        <label for="idsN">Number of logged events N</label>
+                        <input type="number" id="idsN" value="1500" min="50" max="20000" step="50">
+                    </div>
+                    <div class="control-group">
+                        <label for="idsLambda">Dependence strength λ = <span id="idsLambdaVal">0.00</span></label>
+                        <input type="range" id="idsLambda" value="0" min="0" max="1" step="0.05">
+                    </div>
+                    <div class="control-group">
+                        <label for="idsSeed">PRNG seed</label>
+                        <input type="number" id="idsSeed" value="2026" min="1" max="999999">
+                    </div>
+                    <div class="control-group">
+                        <label>&nbsp;</label>
+                        <button class="btn-secondary btn" id="idsReseed"><i class="fa-solid fa-shuffle"></i> New sample</button>
+                    </div>
+                </div>
+                <p id="idsHelp" class="note hidden">
+                    Each event draws a protocol from fixed marginals, then an alert level from \(P(Y\mid X=a_i) = (1-\lambda)\,q + \lambda\, r_i\), where \(q\) is a protocol-independent alert profile and \(r_i\) is a protocol-specific one (SSH brute force, DNS tunnelling, SMTP phishing&hellip;).
+                    With <strong>λ = 0 the variables are independent by construction</strong>, so the test should reject only about α of the time; increasing λ or N makes the dependence detectable.
+                </p>
+
+                <!-- Custom controls -->
+                <div id="customControls" class="hidden">
+                    <div class="controls-grid">
+                        <div class="control-group wide">
+                            <label for="customCsv">CSV with header row (comma or semicolon separated)</label>
+                            <textarea id="customCsv" spellcheck="false">user_role,mfa_enabled,phished
+admin,yes,no
+admin,yes,no
+admin,no,yes
+staff,no,yes
+staff,no,no
+staff,yes,no
+staff,no,yes
+staff,no,no
+intern,no,yes
+intern,no,yes
+intern,yes,no
+intern,no,no
+staff,yes,no
+admin,yes,no
+staff,no,yes
+intern,no,yes
+staff,yes,no
+admin,no,no
+staff,no,no
+intern,yes,no</textarea>
+                        </div>
+                        <div class="control-group">
+                            <label for="customX">Variable X (rows)</label>
+                            <select id="customX"></select>
+                            <label for="customY" style="margin-top:0.6rem;">Variable Y (columns)</label>
+                            <select id="customY"></select>
+                            <label for="customBins" style="margin-top:0.6rem;">Classes for numeric columns</label>
+                            <select id="customBins">
+                                <option value="3">3 (tertiles)</option>
+                                <option value="4" selected>4 (quartiles)</option>
+                                <option value="5">5 (quintiles)</option>
+                            </select>
+                            <button class="btn" id="customParse" style="margin-top:0.8rem;"><i class="fa-solid fa-gears"></i> Parse &amp; analyse</button>
+                        </div>
+                    </div>
+                    <p class="note">Columns with more than 8 distinct numeric values are automatically grouped into quantile classes; everything else is treated as categorical.</p>
+                </div>
+
+                <p id="datasetNote" class="note" style="margin-bottom:0;"></p>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Sample size n &bull; table</div>
+                        <div class="kpi-value" id="kpiN">--</div>
+                        <div class="kpi-sub" id="kpiDims">r × c</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Pearson &chi;&sup2; statistic</div>
+                        <div class="kpi-value" id="kpiChi">--</div>
+                        <div class="kpi-sub" id="kpiChiSub">--</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">p-value P(&chi;&sup2;<sub>ν</sub> ≥ obs)</div>
+                        <div class="kpi-value" id="kpiP">--</div>
+                        <div class="kpi-sub" id="kpiPSub">--</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Cramér's V</div>
+                        <div class="kpi-value" id="kpiV">--</div>
+                        <div class="kpi-sub" id="kpiVSub">--</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Decision at α</div>
+                        <div class="kpi-value" id="kpiDecision">--</div>
+                        <div class="kpi-sub" id="kpiDecisionSub">--</div>
+                    </div>
+                </div>
+
+                <div class="tab-bar" id="tabBar">
+                    <button class="tab-btn active" data-tab="obs">Observed n<sub>ij</sub></button>
+                    <button class="tab-btn" data-tab="rel">Relative f<sub>ij</sub></button>
+                    <button class="tab-btn" data-tab="condRow">Conditional Y | X</button>
+                    <button class="tab-btn" data-tab="condCol">Conditional X | Y</button>
+                    <button class="tab-btn" data-tab="exp">Expected n̂<sub>ij</sub></button>
+                    <button class="tab-btn" data-tab="resid">&chi;&sup2; contributions</button>
+                </div>
+                <p class="tab-caption" id="tabCaption"></p>
+                <div class="table-wrap"><table class="benchmark-table" id="mainTable"></table></div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Mosaic Plot of the Contingency Table</div>
+                                <div class="chart-sub">Width ∝ n<sub>i·</sub>/n &bull; height ∝ f(Y | X = a<sub>i</sub>) &bull; dashed = marginal of Y</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container"><canvas id="canvasMosaic" width="560" height="300"></canvas></div>
+                        <div class="legend" id="mosaicLegend"></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">&chi;&sup2;<sub>ν</sub> Null Distribution &amp; Observed Statistic</div>
+                                <div class="chart-sub">Shaded tail = p-value &bull; dotted line = critical value at α</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container"><canvas id="canvasChi" width="560" height="300"></canvas></div>
+                        <div class="legend">
+                            <span><i class="sw" style="background:#4ade80"></i>χ²ν density</span>
+                            <span><i class="sw" style="background:rgba(239,68,68,0.6)"></i>p-value area</span>
+                            <span><i class="sw" style="background:#eab308"></i>observed χ²</span>
+                            <span><i class="sw" style="background:#8A9A92"></i>critical value</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="verdict" id="verdictBox">
+                    <h4 id="verdictTitle"><i class="fa-solid fa-gavel"></i> Interpretation</h4>
+                    <div id="verdictBody"></div>
+                </div>
+            </div>
+
+            <div class="interactive-box">
+                <h3 class="box-title"><i class="fa-solid fa-code"></i> Core Implementation</h3>
+                <p class="note" style="margin-bottom:0;">The functions actually running on this page (simplified excerpt). The p-value uses the regularised upper incomplete Gamma \(Q(a,x)\), evaluated with a series for \(x &lt; a+1\) and a Lentz continued fraction otherwise, with \(\ln\Gamma\) from the Lanczos approximation.</p>
+<pre><span class="cm">// 1. Contingency table from raw pairs (x_k, y_k)</span>
+<span class="kw">function</span> buildContingency(xs, ys, rowOrder, colOrder) {
+  <span class="kw">const</span> rows = rowOrder ?? uniqueInOrder(xs), cols = colOrder ?? uniqueInOrder(ys);
+  <span class="kw">const</span> ri = <span class="kw">new</span> Map(rows.map((v, i) =&gt; [v, i])), ci = <span class="kw">new</span> Map(cols.map((v, j) =&gt; [v, j]));
+  <span class="kw">const</span> O = rows.map(() =&gt; cols.map(() =&gt; 0));
+  <span class="kw">for</span> (<span class="kw">let</span> k = 0; k &lt; xs.length; k++) O[ri.get(xs[k])][ci.get(ys[k])]++;   <span class="cm">// n_ij</span>
+  <span class="kw">const</span> rowTot = O.map(r =&gt; sum(r));                                    <span class="cm">// n_i.</span>
+  <span class="kw">const</span> colTot = cols.map((_, j) =&gt; sum(O.map(r =&gt; r[j])));            <span class="cm">// n_.j</span>
+  <span class="kw">return</span> { rows, cols, O, rowTot, colTot, n: sum(rowTot) };
+}
+
+<span class="cm">// 2. Frequencies, expected counts, chi-square, p-value, Cramer's V</span>
+<span class="kw">function</span> analyse(T) {
+  <span class="kw">const</span> { O, rowTot, colTot, n } = T, r = O.length, c = O[0].length;
+  <span class="kw">const</span> rel     = O.map(row =&gt; row.map(v =&gt; v / n));                        <span class="cm">// f_ij</span>
+  <span class="kw">const</span> condYX  = O.map((row, i) =&gt; row.map(v =&gt; v / rowTot[i]));          <span class="cm">// f(j | i)</span>
+  <span class="kw">const</span> condXY  = O.map(row =&gt; row.map((v, j) =&gt; v / colTot[j]));          <span class="cm">// f(i | j)</span>
+  <span class="kw">const</span> E       = rowTot.map(ri =&gt; colTot.map(cj =&gt; ri * cj / n));         <span class="cm">// n_i. n_.j / n</span>
+  <span class="kw">let</span> chi2 = 0;
+  <span class="kw">for</span> (<span class="kw">let</span> i = 0; i &lt; r; i++) <span class="kw">for</span> (<span class="kw">let</span> j = 0; j &lt; c; j++)
+    chi2 += (O[i][j] - E[i][j]) ** 2 / E[i][j];
+  <span class="kw">const</span> df = (r - 1) * (c - 1);
+  <span class="kw">const</span> pValue = gammaQ(df / 2, chi2 / 2);                                 <span class="cm">// upper tail of chi2_df</span>
+  <span class="kw">const</span> cramerV = Math.sqrt(chi2 / (n * Math.min(r - 1, c - 1)));
+  <span class="kw">return</span> { rel, condYX, condXY, E, chi2, df, pValue, cramerV };
+}</pre>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- EX 3: MONTE CARLO                                             -->
+        <!-- ============================================================ -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-flask"></i> Ex 3. Monte Carlo Check of the &chi;&sup2; Approximation</h2>
+                <span class="panel-badge">Simulating H<sub>0</sub> with the Observed Margins</span>
+            </div>
+
+            <p>
+                The p-value above relies on Pearson's asymptotic result. To verify it, we <strong>simulate the null hypothesis directly</strong>: we generate \(M\) synthetic datasets of the same size \(n\) in which \(X\) and \(Y\) are drawn <em>independently</em> from the observed marginals \(\hat p_{i\cdot} = n_{i\cdot}/n\) and \(\hat p_{\cdot j} = n_{\cdot j}/n\), and recompute \(\chi^2\) for each one.
+                The histogram of the simulated statistics should overlap the \(\chi^2_\nu\) density, the share of simulated values above the critical value should be close to α (empirical type-I error) and the share above the observed value is a <strong>Monte Carlo p-value</strong> that does not depend on the asymptotic approximation (useful when some \(\hat n_{ij} &lt; 5\)).
+            </p>
+
+            <div class="interactive-box">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label for="mcM">Simulated datasets M</label>
+                        <select id="mcM">
+                            <option value="500">M = 500</option>
+                            <option value="2000" selected>M = 2,000</option>
+                            <option value="5000">M = 5,000</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="mcSeed">PRNG seed</label>
+                        <input type="number" id="mcSeed" value="42" min="1" max="999999">
+                    </div>
+                    <div class="control-group">
+                        <label>&nbsp;</label>
+                        <button class="btn" id="mcRun"><i class="fa-solid fa-play"></i> Run simulation</button>
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Simulated mean of &chi;&sup2;</div>
+                        <div class="kpi-value" id="mcMean">--</div>
+                        <div class="kpi-sub" id="mcMeanSub">theory: E[χ²ν] = ν</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Simulated variance</div>
+                        <div class="kpi-value" id="mcVar">--</div>
+                        <div class="kpi-sub" id="mcVarSub">theory: Var[χ²ν] = 2ν</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Empirical type-I error</div>
+                        <div class="kpi-value" id="mcAlpha">--</div>
+                        <div class="kpi-sub" id="mcAlphaSub">share of χ²* above critical value</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Monte Carlo p-value</div>
+                        <div class="kpi-value" id="mcP">--</div>
+                        <div class="kpi-sub" id="mcPSub">(1 + #{χ²* ≥ χ²obs}) / (M + 1)</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card" style="grid-column: 1 / -1;">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Distribution of &chi;&sup2; under Simulated Independence</div>
+                                <div class="chart-sub" id="mcChartSub">Histogram of M simulated statistics vs theoretical χ²ν density</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container"><canvas id="canvasMC" width="1120" height="300"></canvas></div>
+                        <div class="legend">
+                            <span><i class="sw" style="background:rgba(50,184,114,0.45)"></i>simulated χ²* (density-scaled histogram)</span>
+                            <span><i class="sw" style="background:#4ade80"></i>theoretical χ²ν density</span>
+                            <span><i class="sw" style="background:#eab308"></i>observed χ² (clipped at the right edge if off-scale)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- EX 4: INTERPRETATION & CAUSALITY                              -->
+        <!-- ============================================================ -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title"><i class="fa-solid fa-diagram-project"></i> Ex 4. Interpretation: Association Is Not Causation</h2>
+                <span class="panel-badge">Confounding &bull; Simpson-type Reversal</span>
+            </div>
+
+            <h3 class="box-title"><i class="fa-solid fa-clipboard-check"></i> Results on the Child Smokers dataset</h3>
+            <div class="table-wrap">
+                <table class="benchmark-table static" id="summaryTable">
+                    <thead>
+                        <tr><th>Pair (X, Y)</th><th>Table</th><th>&chi;&sup2;</th><th>df</th><th>p-value</th><th>Cramér's V</th><th>Conclusion at α = 0.05</th></tr>
+                    </thead>
+                    <tbody id="summaryBody"></tbody>
+                </table>
+            </div>
+
+            <div class="theory-grid">
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-venus-mars"></i> &#9312; Sex × Smoking: borderline</h4>
+                    <p id="discSex"></p>
+                    <p>Not rejecting \(H_0\) is <strong>not</strong> a proof of independence: it only says that, with 654 children and only 65 smokers, the observed gap between the conditional distributions is compatible with sampling noise. The test has limited power for a small effect; with α = 0.10, or with a larger sample showing the same proportions, the conclusion would change.</p>
+                </div>
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-hourglass-half"></i> &#9313; Age × Smoking: strong dependence</h4>
+                    <p id="discAge"></p>
+                    <p>Age classes 13–15 and 16–19 are merged into 13–19 so that every expected count is ≥ 5 and Cochran's condition holds. The conditional distribution of smoking changes dramatically across classes, so the variables are clearly <strong>dependent</strong>.</p>
+                </div>
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-lungs"></i> &#9314; Smoking × FEV: the causality trap</h4>
+                    <p id="discFev"></p>
+                    <p>Read naively, this would suggest that <strong>smoking improves lung capacity</strong>. The explanation is a <strong>confounder</strong>: age. Older children both smoke more and have larger lungs, because FEV grows with body size.</p>
+                </div>
+            </div>
+
+            <div class="interactive-box">
+                <h3 class="box-title"><i class="fa-solid fa-layer-group"></i> Stratifying by the confounder (age)</h3>
+                <p class="note">Mean FEV (litres) of smokers and non-smokers <strong>within the same age class</strong>, computed from the raw data. Once age is held fixed, the comparison is between children with similar body size.</p>
+                <div class="table-wrap">
+                    <table class="benchmark-table" id="strataTable"></table>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card" style="grid-column: 1 / -1;">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Mean FEV by Age Class and Smoking Status</div>
+                                <div class="chart-sub">Pooled comparison (left) vs age-stratified comparisons</div>
+                            </div>
+                        </div>
+                        <div class="canvas-container"><canvas id="canvasStrata" width="1120" height="280"></canvas></div>
+                        <div class="legend">
+                            <span><i class="sw" style="background:#3b82f6"></i>non-smokers</span>
+                            <span><i class="sw" style="background:#ef4444"></i>smokers</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="note" id="strataNote" style="margin-top:1rem; margin-bottom:0;"></p>
+            </div>
+
+            <div class="theory-grid two">
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-link"></i> What the &chi;&sup2; test can and cannot say</h4>
+                    <ul>
+                        <li>It answers one question: <strong>is the joint distribution different from the product of the marginals?</strong> It is symmetric in \(X\) and \(Y\), so it carries no notion of direction ("X causes Y" and "Y causes X" give the same statistic).</li>
+                        <li>A small p-value means <strong>association</strong> (statistical dependence); Cramér's V says how strong it is. A large p-value means "no evidence of dependence", not "independence proven".</li>
+                        <li>With huge \(n\) (e.g. millions of log lines) even negligible dependencies become "significant": always look at V and at the conditional profiles, not only at p.</li>
+                    </ul>
+                </div>
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-code-branch"></i> Why association &ne; causation</h4>
+                    <ul>
+                        <li><strong>Confounding:</strong> a third variable \(Z\) drives both (age &rarr; smoking, age &rarr; FEV). Formally, \(X \not\perp Y\) but \(X \perp Y \mid Z\) is possible, and vice versa.</li>
+                        <li><strong>Reverse causation:</strong> \(Y\) may cause \(X\); the test cannot tell the direction.</li>
+                        <li><strong>Selection bias:</strong> the way units enter the sample can create dependence between independent variables (Berkson's paradox).</li>
+                        <li><strong>Chance / multiple testing:</strong> testing many pairs at α = 0.05 yields about 5% false discoveries.</li>
+                    </ul>
+                </div>
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-shield-halved"></i> The same trap in cybersecurity</h4>
+                    <ul>
+                        <li>Hosts with an EDR agent show <em>more</em> detected infections: the agent does not cause malware, it <strong>reveals</strong> it (measurement / reverse causation).</li>
+                        <li>Servers patched most often suffer more attacks: they are the internet-facing ones, so <strong>exposure</strong> confounds patching and attacks.</li>
+                        <li>In the IDS dataset, protocol and alert level are dependent because SSH attracts brute force; this does not mean that "using SSH" makes a connection malicious.</li>
+                    </ul>
+                </div>
+                <div class="theory-card">
+                    <h4><i class="fa-solid fa-microscope"></i> What it takes to claim causality</h4>
+                    <ul>
+                        <li><strong>Randomised experiments</strong> (A/B tests, controlled red-team exercises): randomisation makes the treatment independent of every confounder.</li>
+                        <li><strong>Adjustment for confounders</strong> (stratification as above, regression, matching), guided by a causal model of the domain.</li>
+                        <li>Supporting criteria (Bradford Hill): temporal precedence, dose-response, consistency across studies, plausible mechanism.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="formula-banner">
+                <div><strong>Conclusion.</strong> Statistical independence is the factorisation of the joint distribution into its marginals, which on data means that the conditional profiles coincide with the marginal one. Pearson's &chi;&sup2; measures the distance from this situation and the p-value tells whether that distance is larger than sampling noise would produce. On the Child Smokers data, sex and smoking are only borderline associated, while age and smoking, and smoking and FEV, are clearly dependent. The last association is real, but it goes in the opposite direction to the causal effect: within age classes where smoking is common, smokers have lower lung capacity. Dependence detected by a test is a starting point for causal reasoning, not its conclusion.</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Tommaso Cenciotti &bull; Statistics in Cybersecurity &bull; Sapienza Università di Roma</p>
+    </footer>
+
+    <!-- Raw data: Child Smokers dataset (course material) -->
+    <script type="text/plain" id="childSmokersCsv">
+Age (years),Height (cm),FEV (litres),Sex,Smoker
+9,145,1.708,female,non
+8,171,1.724,female,non
+7,138,1.72,female,non
+9,135,1.558,male,non
+9,145,1.895,male,non
+8,155,2.336,female,non
+6,147,1.919,female,non
+6,142,1.415,female,non
+8,149,1.987,female,non
+9,152,1.942,female,non
+6,135,1.602,female,non
+8,137,1.735,male,non
+8,149,2.193,female,non
+8,154,2.118,male,non
+8,147,2.258,male,non
+7,135,1.932,male,non
+5,127,1.472,male,non
+6,135,1.878,female,non
+9,150,2.352,male,non
+9,156,2.604,male,non
+5,124,1.4,female,non
+5,133,1.256,female,non
+4,122,0.839,female,non
+7,159,2.578,male,non
+9,165,2.988,female,non
+3,131,1.404,male,non
+9,152,2.348,male,non
+5,132,1.755,male,non
+8,152,2.98,female,non
+9,152,2.1,female,non
+5,124,1.282,female,non
+9,166,3,male,non
+8,152,2.673,female,non
+7,146,2.093,female,non
+5,132,1.612,female,non
+8,150,2.175,female,non
+9,150,2.725,male,non
+8,140,2.071,male,non
+8,145,1.547,male,non
+8,145,2.004,male,non
+9,152,3.135,female,non
+8,150,2.42,male,non
+5,130,1.776,male,non
+8,145,1.931,female,non
+5,127,1.343,female,non
+9,145,2.076,female,non
+7,137,1.624,male,non
+8,133,1.344,female,non
+6,140,1.65,male,non
+8,154,2.732,male,non
+5,138,2.017,male,non
+9,156,2.797,female,non
+9,157,3.556,male,non
+8,138,1.703,male,non
+6,137,1.634,male,non
+9,145,2.57,male,non
+9,159,3.016,female,non
+7,152,2.419,female,non
+4,127,1.569,female,non
+8,146,1.698,female,non
+8,152,2.123,male,non
+8,152,2.481,female,non
+6,130,1.481,female,non
+4,124,1.577,female,non
+8,150,1.94,male,non
+6,146,1.747,male,non
+9,147,2.069,male,non
+7,141,1.631,female,non
+5,132,1.536,female,non
+9,154,2.56,female,non
+8,145,1.962,male,non
+8,147,2.531,female,non
+9,152,2.715,male,non
+9,150,2.457,male,non
+9,151,2.09,male,non
+7,142,1.789,male,non
+5,135,1.858,male,non
+5,130,1.452,male,non
+9,175,3.842,male,non
+6,135,1.719,female,non
+7,145,2.111,female,non
+6,135,1.695,female,non
+8,160,2.211,male,non
+8,138,1.794,male,non
+7,147,1.917,female,non
+8,160,2.144,female,non
+7,132,1.253,male,non
+9,156,2.659,male,non
+5,133,1.58,male,non
+9,157,2.126,male,non
+9,156,3.029,female,non
+9,164,2.964,male,non
+7,146,1.611,male,non
+8,152,2.215,female,non
+8,152,2.388,female,non
+9,155,2.196,male,non
+9,147,1.751,male,non
+9,156,2.165,male,non
+7,140,1.682,male,non
+8,140,1.523,male,non
+8,132,1.292,female,non
+7,137,1.649,male,non
+9,160,2.588,male,non
+4,119,0.796,male,non
+9,154,2.574,female,non
+6,142,1.979,male,non
+8,149,2.354,male,non
+6,140,1.718,male,non
+7,149,1.742,female,non
+7,130,1.603,female,non
+8,151,2.639,female,non
+7,137,1.829,female,non
+7,147,2.084,male,non
+7,147,2.22,male,non
+7,133,1.473,female,non
+8,154,2.341,female,non
+7,138,1.698,female,non
+5,118,1.196,female,non
+8,144,1.872,female,non
+7,140,2.219,male,non
+9,145,2.42,male,non
+7,138,1.827,female,non
+7,137,1.461,female,non
+6,135,1.338,male,non
+8,145,2.09,male,non
+8,150,1.697,female,non
+8,140,1.562,male,non
+9,141,2.04,female,non
+7,131,1.609,female,non
+8,155,2.458,female,non
+9,161,2.65,male,non
+8,146,1.429,male,non
+8,135,1.675,male,non
+9,144,1.947,female,non
+8,137,2.069,male,non
+6,132,1.572,male,non
+6,135,1.348,male,non
+8,156,2.288,female,non
+9,149,1.773,male,non
+5,132,0.791,female,non
+7,147,1.905,male,non
+9,155,2.463,female,non
+6,130,1.431,male,non
+9,157,2.631,female,non
+9,164,3.114,male,non
+9,149,2.135,male,non
+6,133,1.527,male,non
+8,147,2.293,female,non
+9,168,3.042,female,non
+8,161,2.927,male,non
+8,163,2.665,female,non
+9,149,2.301,male,non
+9,163,2.46,male,non
+9,154,2.592,female,non
+7,140,1.75,female,non
+8,135,1.759,male,non
+6,122,1.536,male,non
+9,149,2.259,female,non
+9,164,2.048,female,non
+9,154,2.571,male,non
+7,142,2.046,male,non
+8,149,1.78,female,non
+5,137,1.552,female,non
+8,147,1.953,female,non
+9,164,2.893,male,non
+6,128,1.713,male,non
+9,152,2.851,female,non
+6,131,1.624,male,non
+8,150,2.631,male,non
+5,135,1.819,male,non
+7,135,1.658,male,non
+7,136,2.158,male,non
+4,132,1.789,male,non
+9,163,3.004,female,non
+8,160,2.503,male,non
+9,147,1.933,female,non
+9,149,2.091,female,non
+9,151,2.316,female,non
+5,130,1.704,female,non
+9,146,1.606,female,non
+7,119,1.165,male,non
+6,141,2.102,female,non
+9,145,2.32,female,non
+9,155,2.23,male,non
+9,141,1.716,male,non
+7,136,1.79,male,non
+5,127,1.146,female,non
+8,156,2.187,female,non
+9,156,2.717,male,non
+7,140,1.796,male,non
+8,144,1.335,female,non
+9,145,2.119,male,non
+6,132,1.666,male,non
+6,133,1.826,male,non
+8,159,2.709,female,non
+9,165,2.871,male,non
+5,127,1.092,female,non
+6,146,2.262,male,non
+6,144,2.104,male,non
+9,146,2.166,female,non
+7,137,1.69,female,non
+9,151,2.973,male,non
+8,151,2.145,female,non
+5,147,1.971,male,non
+7,145,2.095,female,non
+6,140,1.697,female,non
+9,152,2.455,female,non
+7,144,1.92,male,non
+9,152,2.164,male,non
+9,150,2.13,female,non
+8,160,2.993,female,non
+9,150,2.529,female,non
+7,135,1.726,female,non
+9,156,2.442,female,non
+4,122,1.102,female,non
+9,160,2.056,female,non
+5,141,1.808,male,non
+8,164,2.305,female,non
+9,150,1.969,female,non
+8,149,1.556,female,non
+3,117,1.072,female,non
+9,157,2.042,male,non
+8,135,1.512,female,non
+6,126,1.423,male,non
+9,173,3.681,male,non
+8,151,1.991,male,non
+8,141,1.897,male,non
+7,140,1.37,female,non
+6,131,1.338,female,non
+8,142,2.016,male,non
+9,160,2.639,female,non
+4,122,1.389,female,non
+7,144,1.612,male,non
+8,150,2.135,female,non
+8,154,2.681,male,non
+9,165,3.223,female,non
+6,140,1.796,female,non
+8,140,2.01,male,non
+6,130,1.523,female,non
+8,133,1.744,male,non
+9,163,2.485,female,non
+8,150,2.335,female,non
+7,136,1.415,female,non
+9,154,2.076,male,non
+8,151,2.435,male,non
+7,144,1.728,female,non
+9,160,2.85,female,non
+8,144,1.844,female,non
+9,156,1.754,female,non
+6,132,1.343,female,non
+8,145,2.303,male,non
+9,161,2.246,male,non
+8,160,2.476,female,non
+9,165,3.239,male,non
+9,156,2.457,male,non
+8,157,2.382,female,non
+7,140,1.64,female,non
+5,130,1.589,female,non
+7,137,2.056,male,non
+8,145,2.226,male,non
+9,142,1.886,female,non
+9,156,2.833,male,non
+6,135,1.715,male,non
+8,150,2.631,male,non
+7,142,2.55,male,non
+9,150,1.912,female,non
+7,133,1.877,female,non
+7,133,1.935,female,non
+5,127,1.539,female,non
+9,151,2.803,male,non
+9,163,2.923,male,non
+8,155,2.358,female,non
+8,146,2.094,male,non
+9,152,1.855,male,non
+6,140,1.535,female,non
+7,142,2.135,male,non
+5,130,1.93,male,non
+9,151,2.182,female,non
+5,128,1.359,male,non
+7,146,2.002,female,non
+6,137,1.699,male,non
+8,145,2.5,male,non
+7,147,2.366,female,non
+8,152,2.069,female,non
+4,124,1.418,female,non
+8,145,2.333,female,non
+5,132,1.514,male,non
+8,132,1.758,female,non
+7,151,2.535,male,non
+7,147,2.564,female,non
+9,163,2.487,female,non
+9,145,1.591,female,non
+8,135,1.624,male,non
+9,157,2.798,male,non
+6,135,1.691,male,non
+8,144,1.999,female,non
+9,145,1.869,male,non
+4,122,1.004,male,non
+6,126,1.427,male,non
+7,130,1.826,male,non
+9,151,2.688,female,non
+8,142,1.657,male,non
+6,137,1.672,female,non
+8,146,2.015,female,non
+7,141,2.371,female,non
+5,127,2.115,male,non
+8,152,2.328,female,non
+7,145,1.495,female,non
+11,175,2.884,male,non
+10,163,2.328,male,non
+14,160,3.381,male,non
+11,147,2.17,female,non
+11,169,3.47,male,non
+12,154,3.058,female,non
+10,145,1.811,male,non
+11,163,2.524,male,non
+10,155,2.642,female,non
+14,174,3.741,male,non
+13,177,4.336,male,non
+14,183,4.842,male,non
+12,180,4.55,male,non
+12,160,2.841,female,non
+10,156,3.166,female,non
+13,161,3.816,female,non
+10,157,2.561,male,non
+11,165,3.654,female,non
+10,155,2.481,male,non
+11,160,2.665,female,non
+10,168,3.203,male,non
+13,173,3.549,male,non
+11,183,3.222,male,non
+10,168,3.111,male,non
+11,170,3.49,female,non
+13,163,3.147,female,non
+10,154,2.52,female,non
+10,160,2.292,male,non
+12,163,2.889,female,non
+10,154,2.246,male,non
+10,157,1.937,male,non
+10,152,2.646,male,non
+11,164,2.957,male,non
+11,170,4.007,male,non
+11,156,2.386,female,non
+10,168,3.251,male,non
+11,152,2.762,female,non
+11,163,3.011,female,non
+13,174,4.305,male,non
+13,170,3.906,male,non
+11,170,3.583,male,non
+11,168,3.236,female,non
+14,159,3.436,male,non
+11,155,3.058,male,non
+10,157,3.007,male,non
+10,169,3.489,male,non
+10,152,2.864,female,non
+13,157,2.819,female,non
+10,147,2.25,female,non
+14,174,4.683,male,non
+10,156,2.352,male,non
+11,164,3.108,male,non
+13,170,3.994,male,non
+12,174,4.393,male,non
+10,165,2.592,male,non
+13,178,3.193,male,non
+11,150,2.346,female,non
+11,171,3.515,male,non
+11,166,2.754,female,non
+10,166,2.72,male,non
+11,164,2.463,male,non
+11,157,2.633,female,non
+10,166,3.048,female,non
+11,171,3.111,male,non
+13,173,3.745,female,non
+10,149,2.094,male,non
+10,166,3.183,female,non
+11,179,3.977,male,non
+10,160,3.354,male,non
+11,161,3.411,female,non
+11,160,3.171,female,non
+13,171,3.887,male,non
+13,156,2.646,female,non
+10,152,2.504,female,non
+11,164,3.587,male,non
+11,174,3.845,male,non
+12,164,2.971,male,non
+10,155,2.891,female,non
+10,145,1.823,female,non
+11,159,2.417,male,non
+10,147,2.175,female,non
+11,159,2.735,female,non
+14,184,4.273,male,non
+13,166,2.976,male,non
+11,169,4.065,male,non
+11,150,2.318,female,non
+11,173,3.596,male,non
+14,170,3.395,female,non
+12,160,2.751,female,non
+10,164,2.673,female,non
+12,157,2.556,female,non
+11,157,2.542,female,non
+10,168,2.608,male,non
+11,157,2.354,female,non
+10,145,1.458,female,non
+10,174,3.795,male,non
+11,150,2.491,female,non
+13,156,3.06,female,non
+10,165,2.545,male,non
+11,169,2.993,male,non
+10,165,3.305,female,non
+11,170,3.774,female,non
+10,164,2.855,male,non
+11,178,2.988,male,non
+11,152,2.498,male,non
+14,163,3.169,female,non
+11,159,2.887,male,non
+13,155,2.704,female,non
+11,163,3.515,female,non
+11,166,3.425,male,non
+10,155,2.287,female,non
+13,166,2.434,female,non
+10,161,2.365,female,non
+10,168,2.696,male,non
+12,157,2.868,female,non
+10,156,2.813,female,non
+12,168,3.255,female,non
+11,175,4.593,male,non
+14,180,4.111,male,non
+12,154,1.916,male,non
+10,147,1.858,male,non
+10,175,3.35,male,non
+10,151,2.901,male,non
+12,163,2.241,male,non
+13,188,4.225,male,non
+11,164,3.223,female,non
+12,178,5.224,male,non
+11,170,4.073,male,non
+12,164,4.08,male,non
+11,165,2.606,female,non
+12,173,4.411,male,non
+12,174,3.791,male,non
+13,171,3.089,male,non
+11,152,2.465,male,non
+10,165,3.2,male,non
+12,163,2.913,male,non
+13,185,4.877,male,non
+10,150,2.358,female,non
+12,179,3.279,male,non
+10,168,2.581,male,non
+12,156,2.347,female,non
+10,170,2.691,female,non
+11,159,2.827,female,non
+10,133,1.873,male,non
+14,180,2.538,female,non
+10,166,2.758,male,non
+10,152,3.05,female,non
+12,152,3.079,female,non
+10,154,2.201,male,non
+10,150,1.858,male,non
+12,157,3.403,female,non
+12,164,3.501,female,non
+11,160,2.578,female,non
+10,145,1.665,male,non
+11,160,2.081,female,non
+11,157,2.974,female,non
+12,174,4.073,male,non
+13,175,4.448,male,non
+13,180,3.984,male,non
+10,147,2.25,female,non
+12,161,2.752,female,non
+14,170,3.68,male,non
+10,155,2.862,female,non
+11,171,3.023,female,non
+11,173,3.681,female,non
+13,169,3.255,female,non
+12,170,3.692,male,non
+10,154,2.356,female,non
+10,178,4.591,male,non
+12,161,3.082,female,non
+11,160,3.258,female,non
+10,155,2.216,male,non
+11,166,3.247,male,non
+11,171,4.324,male,non
+11,155,2.362,female,non
+11,160,2.563,female,non
+11,161,3.206,male,non
+14,178,3.585,male,non
+12,182,4.72,male,non
+13,166,3.331,female,non
+13,188,5.083,male,non
+12,155,2.417,female,non
+10,155,2.364,male,non
+10,155,2.341,male,non
+12,160,3.231,male,non
+11,171,3.078,male,non
+11,179,3.369,male,non
+12,179,3.529,male,non
+12,157,2.866,female,non
+14,157,2.891,female,non
+11,156,3.022,female,non
+10,157,3.127,male,non
+11,154,2.866,female,non
+12,159,2.605,female,non
+13,160,3.056,female,non
+12,160,2.569,female,non
+11,157,2.501,female,non
+11,166,3.32,male,non
+11,165,2.123,male,non
+14,178,3.78,male,non
+11,168,3.847,male,non
+12,173,3.924,male,non
+10,150,2.132,male,non
+12,174,2.752,male,non
+13,160,2.449,female,non
+10,160,3.456,male,non
+10,168,3.073,female,non
+10,157,2.688,female,non
+10,173,3.329,male,non
+14,184,4.271,male,non
+12,163,3.53,male,non
+11,166,2.928,male,non
+11,156,2.689,female,non
+12,145,2.332,male,non
+14,163,2.934,female,non
+10,164,3.11,male,non
+11,170,2.894,male,non
+10,165,2.435,female,non
+10,160,2.838,female,non
+12,157,3.035,female,non
+12,180,4.831,male,non
+11,155,2.812,male,non
+12,166,2.714,female,non
+10,157,3.086,female,non
+12,166,3.519,female,non
+13,179,4.232,male,non
+10,157,2.77,male,non
+12,166,3.341,female,non
+10,165,3.09,male,non
+13,155,2.531,male,non
+12,177,2.822,male,non
+12,166,2.935,male,non
+10,161,2.568,female,non
+11,154,2.387,male,non
+12,165,2.499,male,non
+11,170,4.13,male,non
+12,161,3.001,female,non
+10,151,3.132,female,non
+13,161,3.577,female,non
+12,155,3.222,female,non
+11,168,3.28,male,non
+11,163,2.659,male,non
+11,157,2.822,female,non
+11,154,2.14,female,non
+12,180,4.203,male,non
+14,164,2.997,female,non
+11,159,2.562,female,non
+12,164,3.082,female,non
+14,173,3.806,male,non
+11,152,2.458,female,non
+10,151,2.391,male,non
+13,155,3.141,female,non
+12,160,2.579,female,non
+10,147,2.1,male,non
+11,175,2.785,male,non
+15,178,4.284,male,non
+18,168,2.906,female,non
+19,183,5.102,male,non
+17,178,4.429,male,non
+15,171,4.279,male,non
+15,178,4.5,male,non
+15,163,2.635,female,non
+18,164,3.082,female,non
+16,169,3.387,female,non
+15,175,5.793,male,non
+15,180,3.985,male,non
+18,173,4.22,male,non
+17,179,4.724,male,non
+15,170,3.731,male,non
+17,157,3.5,female,non
+16,171,3.674,female,non
+17,185,5.633,male,non
+16,187,3.645,male,non
+15,160,2.887,female,non
+17,178,3.96,male,non
+16,168,4.299,male,non
+16,168,2.981,female,non
+16,183,4.504,male,non
+17,178,5.638,male,non
+18,152,2.853,female,non
+15,169,3.211,female,non
+9,147,1.953,male,smoker
+14,168,2.236,female,smoker
+14,163,3.428,female,smoker
+13,155,3.208,female,smoker
+11,152,1.694,male,smoker
+14,183,3.957,male,smoker
+13,175,4.789,male,smoker
+12,161,2.384,female,smoker
+14,165,3.074,female,smoker
+10,168,2.387,female,smoker
+12,177,3.835,female,smoker
+13,159,2.599,female,smoker
+13,173,4.756,male,smoker
+13,171,3.086,female,smoker
+14,175,4.309,male,smoker
+10,168,3.413,female,smoker
+10,160,2.975,female,smoker
+11,159,3.169,female,smoker
+12,173,3.343,male,smoker
+12,183,3.751,male,smoker
+13,173,2.216,female,smoker
+13,168,3.078,female,smoker
+12,170,3.186,female,smoker
+13,165,3.297,female,smoker
+12,169,2.304,male,smoker
+11,163,3.102,female,smoker
+13,170,2.677,female,smoker
+13,165,3.297,female,smoker
+10,173,3.498,male,smoker
+12,156,2.759,female,smoker
+11,170,2.953,female,smoker
+13,160,3.785,female,smoker
+14,168,2.276,male,smoker
+11,183,4.637,male,smoker
+10,165,3.038,female,smoker
+11,155,3.12,female,smoker
+11,174,3.339,male,smoker
+13,157,3.152,female,smoker
+11,171,3.104,female,smoker
+13,175,4.045,male,smoker
+14,173,4.763,male,smoker
+11,165,3.069,female,smoker
+15,180,4.506,male,smoker
+19,168,3.519,female,smoker
+16,173,3.688,male,smoker
+15,168,2.679,female,smoker
+15,157,2.198,female,smoker
+19,166,3.345,female,smoker
+17,170,3.082,male,smoker
+16,160,2.903,female,smoker
+15,163,3.004,female,smoker
+17,175,3.406,male,smoker
+15,163,3.122,female,smoker
+15,174,3.33,female,smoker
+16,157,2.608,female,smoker
+15,169,3.799,male,smoker
+18,170,4.086,male,smoker
+16,177,4.07,male,smoker
+15,160,2.264,female,smoker
+18,179,4.404,male,smoker
+15,152,2.278,female,smoker
+16,183,4.872,male,smoker
+16,170,4.27,male,smoker
+15,173,3.727,male,smoker
+16,160,2.795,female,smoker
+    </script>
+
+    <script>
+        // =====================================================================
+        // UTILITIES
+        // =====================================================================
+        const sum = arr => arr.reduce((a, b) => a + b, 0);
+        const PALETTE = ['#32B872', '#3b82f6', '#eab308', '#ef4444', '#a78bfa', '#22d3ee', '#f472b6', '#94a3b8', '#fb923c', '#84cc16'];
+
+        function mulberry32(seed) {
+            let a = seed >>> 0;
+            return function () {
+                a = (a + 0x6D2B79F5) >>> 0;
+                let t = a;
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        function sampleIndex(cum, u) {
+            for (let i = 0; i < cum.length; i++) if (u < cum[i]) return i;
+            return cum.length - 1;
+        }
+        function cumulative(p) {
+            const s = sum(p); let acc = 0;
+            return p.map(v => (acc += v / s));
+        }
+
+        function uniqueInOrder(arr) {
+            const seen = new Set(), out = [];
+            for (const v of arr) if (!seen.has(v)) { seen.add(v); out.push(v); }
+            return out;
+        }
+        function naturalSort(values) {
+            const allNum = values.every(v => v !== '' && !isNaN(Number(v)));
+            return [...values].sort((a, b) => allNum ? Number(a) - Number(b) : String(a).localeCompare(String(b)));
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+        }
+
+        function fmtP(p) {
+            if (p === 0 || p < 1e-300) return '< 1e-300';
+            if (p < 1e-4) return p.toExponential(2);
+            return p.toFixed(4);
+        }
+
+        // =====================================================================
+        // SPECIAL FUNCTIONS: ln Gamma, regularised incomplete Gamma, chi2 pdf
+        // =====================================================================
+        const LANCZOS = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
+            -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+        function lnGamma(z) {
+            if (z < 0.5) return Math.log(Math.PI / Math.abs(Math.sin(Math.PI * z))) - lnGamma(1 - z);
+            z -= 1;
+            let x = LANCZOS[0];
+            for (let i = 1; i < 9; i++) x += LANCZOS[i] / (z + i);
+            const t = z + 7.5;
+            return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+        }
+
+        // Lower regularised P(a, x) by series (valid for x < a + 1)
+        function gammaPSeries(a, x) {
+            let ap = a, del = 1 / a, s = del;
+            for (let n = 0; n < 1000; n++) {
+                ap += 1; del *= x / ap; s += del;
+                if (Math.abs(del) < Math.abs(s) * 1e-15) break;
+            }
+            return s * Math.exp(-x + a * Math.log(x) - lnGamma(a));
+        }
+        // Upper regularised Q(a, x) by continued fraction, modified Lentz (valid for x >= a + 1)
+        function gammaQContFrac(a, x) {
+            const FPMIN = 1e-300;
+            let b = x + 1 - a, c = 1 / FPMIN, d = 1 / b, h = d;
+            for (let i = 1; i < 1000; i++) {
+                const an = -i * (i - a);
+                b += 2;
+                d = an * d + b; if (Math.abs(d) < FPMIN) d = FPMIN;
+                c = b + an / c; if (Math.abs(c) < FPMIN) c = FPMIN;
+                d = 1 / d;
+                const del = d * c; h *= del;
+                if (Math.abs(del - 1) < 1e-15) break;
+            }
+            return Math.exp(-x + a * Math.log(x) - lnGamma(a)) * h;
+        }
+        function gammaQ(a, x) {
+            if (x <= 0) return 1;
+            return x < a + 1 ? 1 - gammaPSeries(a, x) : gammaQContFrac(a, x);
+        }
+        function chi2Sf(x, df) { return gammaQ(df / 2, x / 2); }
+        function chi2Pdf(x, df) {
+            if (x <= 0) return df === 2 ? 0.5 : (df < 2 ? Infinity : 0);
+            const k = df / 2;
+            return Math.exp((k - 1) * Math.log(x) - x / 2 - k * Math.log(2) - lnGamma(k));
+        }
+        function chi2Critical(alpha, df) {
+            let lo = 0, hi = Math.max(10, df * 10);
+            while (chi2Sf(hi, df) > alpha) hi *= 2;
+            for (let it = 0; it < 200; it++) {
+                const mid = 0.5 * (lo + hi);
+                if (chi2Sf(mid, df) > alpha) lo = mid; else hi = mid;
+            }
+            return 0.5 * (lo + hi);
+        }
+
+        // =====================================================================
+        // CORE: CONTINGENCY TABLE + ANALYSIS
+        // =====================================================================
+        function buildContingency(xs, ys, rowOrder, colOrder) {
+            const rows = rowOrder || uniqueInOrder(xs);
+            const cols = colOrder || uniqueInOrder(ys);
+            const ri = new Map(rows.map((v, i) => [v, i]));
+            const ci = new Map(cols.map((v, j) => [v, j]));
+            const O = rows.map(() => cols.map(() => 0));
+            for (let k = 0; k < xs.length; k++) {
+                const i = ri.get(xs[k]), j = ci.get(ys[k]);
+                if (i === undefined || j === undefined) continue;
+                O[i][j]++;
+            }
+            // drop empty rows / columns (categories in the order list that never occur)
+            const keepR = O.map(r => sum(r) > 0);
+            const keepC = cols.map((_, j) => O.some(r => r[j] > 0));
+            const O2 = O.filter((_, i) => keepR[i]).map(r => r.filter((_, j) => keepC[j]));
+            const rows2 = rows.filter((_, i) => keepR[i]);
+            const cols2 = cols.filter((_, j) => keepC[j]);
+            const rowTot = O2.map(r => sum(r));
+            const colTot = cols2.map((_, j) => sum(O2.map(r => r[j])));
+            return { rows: rows2, cols: cols2, O: O2, rowTot, colTot, n: sum(rowTot) };
+        }
+
+        function analyse(T) {
+            const { O, rowTot, colTot, n } = T;
+            const r = O.length, c = O[0].length;
+            const rel = O.map(row => row.map(v => v / n));
+            const relRow = rowTot.map(v => v / n);
+            const relCol = colTot.map(v => v / n);
+            const condYX = O.map((row, i) => row.map(v => v / rowTot[i]));
+            const condXY = O.map(row => row.map((v, j) => v / colTot[j]));
+            const E = rowTot.map(ri => colTot.map(cj => ri * cj / n));
+            const contrib = O.map((row, i) => row.map((v, j) => (v - E[i][j]) ** 2 / E[i][j]));
+            const resid = O.map((row, i) => row.map((v, j) => (v - E[i][j]) / Math.sqrt(E[i][j])));
+            const chi2 = sum(contrib.map(sum));
+            const df = (r - 1) * (c - 1);
+            const pValue = df > 0 ? chi2Sf(chi2, df) : 1;
+            const kmin = Math.min(r - 1, c - 1);
+            const cramerV = kmin > 0 ? Math.sqrt(chi2 / (n * kmin)) : 0;
+            let lowE = 0, minE = Infinity;
+            E.forEach(row => row.forEach(e => { if (e < 5) lowE++; if (e < minE) minE = e; }));
+            let yates = null;
+            if (r === 2 && c === 2) {
+                yates = 0;
+                for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++)
+                    yates += Math.max(0, Math.abs(O[i][j] - E[i][j]) - 0.5) ** 2 / E[i][j];
+            }
+            let maxDev = 0;
+            condYX.forEach(row => row.forEach((v, j) => { maxDev = Math.max(maxDev, Math.abs(v - relCol[j])); }));
+            return { r, c, rel, relRow, relCol, condYX, condXY, E, contrib, resid, chi2, df, pValue, cramerV, lowE, minE, yates, maxDev };
+        }
+
+        // =====================================================================
+        // DATASETS
+        // =====================================================================
+        const CHILD = (() => {
+            const lines = document.getElementById('childSmokersCsv').textContent.trim().split(/\r?\n/);
+            return lines.slice(1).map(l => {
+                const [age, height, fev, sex, smoker] = l.split(',');
+                return { age: +age, height: +height, fev: +fev, sex: sex.trim(), smoker: smoker.trim() === 'smoker' ? 'Smoker' : 'Non-smoker' };
+            });
+        })();
+
+        function ageClass3(a) { return a <= 9 ? '3–9 yrs' : (a <= 12 ? '10–12 yrs' : '13–19 yrs'); }
+        function ageClass4(a) { return a <= 9 ? '3–9 yrs' : (a <= 12 ? '10–12 yrs' : (a <= 15 ? '13–15 yrs' : '16–19 yrs')); }
+
+        function quantileCuts(values, k) {
+            const s = [...values].sort((a, b) => a - b);
+            const cuts = [];
+            for (let q = 1; q < k; q++) {
+                const pos = (s.length - 1) * q / k, lo = Math.floor(pos);
+                cuts.push(s[lo] + (s[Math.min(lo + 1, s.length - 1)] - s[lo]) * (pos - lo));
+            }
+            return cuts;
+        }
+        function classify(v, cuts) { let i = 0; while (i < cuts.length && v > cuts[i]) i++; return i; }
+
+        const FEV_CUTS = quantileCuts(CHILD.map(d => d.fev), 3);
+        const FEV_LABELS = [`Low (≤ ${FEV_CUTS[0].toFixed(2)} L)`, `Medium`, `High (> ${FEV_CUTS[1].toFixed(2)} L)`];
+
+        const IDS_PROTOCOLS = ['HTTP', 'HTTPS', 'DNS', 'SSH', 'SMTP'];
+        const IDS_PROTO_P = [0.28, 0.32, 0.18, 0.12, 0.10];
+        const IDS_ALERTS = ['Benign', 'Suspicious', 'Malicious'];
+        const IDS_BASE = [0.80, 0.14, 0.06];
+        const IDS_SPECIFIC = [
+            [0.74, 0.18, 0.08],  // HTTP: web scans, injections
+            [0.90, 0.08, 0.02],  // HTTPS
+            [0.70, 0.20, 0.10],  // DNS: tunnelling / DGA
+            [0.50, 0.25, 0.25],  // SSH: brute force
+            [0.58, 0.24, 0.18]   // SMTP: phishing / spam
+        ];
+
+        function generateIds(N, lambda, seed) {
+            const rnd = mulberry32(seed);
+            const cumProto = cumulative(IDS_PROTO_P);
+            const cumAlert = IDS_SPECIFIC.map(spec => cumulative(spec.map((v, j) => (1 - lambda) * IDS_BASE[j] + lambda * v)));
+            const xs = [], ys = [];
+            for (let k = 0; k < N; k++) {
+                const i = sampleIndex(cumProto, rnd());
+                const j = sampleIndex(cumAlert[i], rnd());
+                xs.push(IDS_PROTOCOLS[i]); ys.push(IDS_ALERTS[j]);
+            }
+            return { xs, ys };
+        }
+
+        function generateSquare(N, seed) {
+            const rnd = mulberry32(seed);
+            const xs = [], ys = [];
+            let sx = 0, sy = 0, sxy = 0;
+            for (let k = 0; k < N; k++) {
+                const x = [-1, 0, 1][Math.floor(rnd() * 3)];
+                const y = x * x;
+                xs.push(String(x)); ys.push(String(y));
+                sx += x; sy += y; sxy += x * y;
+            }
+            const cov = sxy / N - (sx / N) * (sy / N);
+            return { xs, ys, cov };
+        }
+
+        let customState = { headers: [], rows: [] };
+
+        function getDataset(key) {
+            switch (key) {
+                case 'sexSmoke':
+                    return {
+                        xName: 'Sex', yName: 'Smoking',
+                        xs: CHILD.map(d => d.sex), ys: CHILD.map(d => d.smoker),
+                        rowOrder: ['female', 'male'], colOrder: ['Non-smoker', 'Smoker'],
+                        note: 'Real data (course material). X = sex of the child, Y = smoking status. 2×2 table: Yates\' continuity-corrected χ² is also reported.'
+                    };
+                case 'ageSmoke':
+                    return {
+                        xName: 'Age class', yName: 'Smoking',
+                        xs: CHILD.map(d => ageClass3(d.age)), ys: CHILD.map(d => d.smoker),
+                        rowOrder: ['3–9 yrs', '10–12 yrs', '13–19 yrs'], colOrder: ['Non-smoker', 'Smoker'],
+                        note: 'Real data. X = age grouped into classes (13–15 and 16–19 merged so that every expected count is ≥ 5), Y = smoking status.'
+                    };
+                case 'smokeFev':
+                    return {
+                        xName: 'Smoking', yName: 'FEV class',
+                        xs: CHILD.map(d => d.smoker), ys: CHILD.map(d => FEV_LABELS[classify(d.fev, FEV_CUTS)]),
+                        rowOrder: ['Non-smoker', 'Smoker'], colOrder: FEV_LABELS,
+                        note: `Real data. X = smoking status, Y = forced expiratory volume grouped into sample tertiles (cut points ${FEV_CUTS[0].toFixed(3)} L and ${FEV_CUTS[1].toFixed(3)} L). See Ex 4 for why this association must not be read causally.`
+                    };
+                case 'ids': {
+                    const N = Math.max(50, Math.min(20000, parseInt(document.getElementById('idsN').value, 10) || 1500));
+                    const lambda = parseFloat(document.getElementById('idsLambda').value) || 0;
+                    const seed = parseInt(document.getElementById('idsSeed').value, 10) || 1;
+                    const { xs, ys } = generateIds(N, lambda, seed);
+                    return {
+                        xName: 'Protocol', yName: 'Alert level', xs, ys,
+                        rowOrder: IDS_PROTOCOLS, colOrder: IDS_ALERTS,
+                        note: `Synthetic network events generated in the browser (N = ${N}, λ = ${lambda.toFixed(2)}, seed = ${seed}). ` +
+                            (lambda === 0 ? 'Ground truth: X and Y are INDEPENDENT.' : 'Ground truth: X and Y are DEPENDENT (λ > 0).'),
+                        truth: lambda === 0 ? 'indep' : 'dep'
+                    };
+                }
+                case 'square': {
+                    const { xs, ys, cov } = generateSquare(300, 7);
+                    return {
+                        xName: 'X', yName: 'Y = X²', xs, ys,
+                        rowOrder: ['-1', '0', '1'], colOrder: ['0', '1'],
+                        note: `300 draws of X uniform on {−1, 0, 1} with Y = X². Sample covariance Cov(X, Y) = ${cov.toFixed(4)} (≈ 0, theoretical value exactly 0), yet the χ² test detects a perfect dependence.`,
+                        truth: 'dep'
+                    };
+                }
+                case 'custom': {
+                    const xCol = document.getElementById('customX').value;
+                    const yCol = document.getElementById('customY').value;
+                    const bins = parseInt(document.getElementById('customBins').value, 10) || 4;
+                    if (!customState.rows.length || xCol === '' || yCol === '') return null;
+                    const xi = +xCol, yi = +yCol;
+                    const colValues = idx => {
+                        const raw = customState.rows.map(r => (r[idx] ?? '').trim());
+                        const distinct = new Set(raw);
+                        const numeric = raw.every(v => v !== '' && !isNaN(Number(v)));
+                        if (numeric && distinct.size > 8) {
+                            const nums = raw.map(Number), cuts = quantileCuts(nums, bins);
+                            const labels = Array.from({ length: bins }, (_, q) => `Q${q + 1}`);
+                            return { values: nums.map(v => labels[classify(v, cuts)]), order: labels, binned: true };
+                        }
+                        return { values: raw, order: naturalSort([...distinct]), binned: false };
+                    };
+                    const X = colValues(xi), Y = colValues(yi);
+                    return {
+                        xName: customState.headers[xi], yName: customState.headers[yi],
+                        xs: X.values, ys: Y.values, rowOrder: X.order, colOrder: Y.order,
+                        note: `Custom dataset: ${customState.rows.length} rows. X = "${escapeHtml(customState.headers[xi])}"${X.binned ? ' (binned)' : ''}, Y = "${escapeHtml(customState.headers[yi])}"${Y.binned ? ' (binned)' : ''}.`
+                    };
+                }
+            }
+            return null;
+        }
+
+        function parseCustomCsv() {
+            const text = document.getElementById('customCsv').value.trim();
+            const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+            if (lines.length < 3) { customState = { headers: [], rows: [] }; return false; }
+            const sep = (lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length ? ';' : ',';
+            const split = l => l.split(sep).map(s => s.trim().replace(/^"|"$/g, ''));
+            const headers = split(lines[0]);
+            const rows = lines.slice(1).map(split).filter(r => r.length >= headers.length);
+            customState = { headers, rows };
+            const fill = (sel, def) => {
+                const prev = sel.value;
+                sel.innerHTML = headers.map((h, i) => `<option value="${i}">${escapeHtml(h)}</option>`).join('');
+                sel.value = prev !== '' && +prev < headers.length ? prev : String(def);
+            };
+            fill(document.getElementById('customX'), headers.length > 2 ? 1 : 0);
+            fill(document.getElementById('customY'), Math.min(headers.length - 1, headers.length > 2 ? 2 : 1));
+            return true;
+        }
+
+        // =====================================================================
+        // RENDERING
+        // =====================================================================
+        let STATE = null;   // { ds, T, A, alpha, crit }
+        let activeTab = 'obs';
+
+        function runAnalysis() {
+            const key = document.getElementById('datasetSelect').value;
+            const alpha = parseFloat(document.getElementById('alphaSelect').value);
+            const ds = getDataset(key);
+            document.getElementById('datasetNote').innerHTML = ds ? ds.note : '<span class="warn-text">Paste a CSV with at least two columns and two data rows.</span>';
+            if (!ds) return;
+            const T = buildContingency(ds.xs, ds.ys, ds.rowOrder, ds.colOrder);
+            if (T.rows.length < 2 || T.cols.length < 2) {
+                document.getElementById('datasetNote').innerHTML = ds.note + ' <span class="warn-text">Each variable needs at least two observed categories.</span>';
+                return;
+            }
+            const A = analyse(T);
+            const crit = chi2Critical(alpha, A.df);
+            STATE = { key, ds, T, A, alpha, crit };
+            renderKpis();
+            renderTable();
+            drawMosaic();
+            drawChiDensity();
+            renderVerdict();
+            runMonteCarlo();
+        }
+
+        function strengthLabel(V, kmin) {
+            // Cohen's conventions for Cramér's V depend on min(r-1, c-1)
+            const t = kmin === 1 ? [0.1, 0.3, 0.5] : (kmin === 2 ? [0.07, 0.21, 0.35] : [0.06, 0.17, 0.29]);
+            if (V < t[0]) return 'negligible';
+            if (V < t[1]) return 'weak';
+            if (V < t[2]) return 'moderate';
+            return 'strong';
+        }
+
+        function renderKpis() {
+            const { T, A, alpha, crit } = STATE;
+            document.getElementById('kpiN').innerText = T.n.toLocaleString('en-US');
+            document.getElementById('kpiDims').innerText = `${A.r} × ${A.c} table • ${A.r * A.c} cells`;
+            document.getElementById('kpiChi').innerText = A.chi2.toFixed(3);
+            document.getElementById('kpiChiSub').innerText = `df ν = ${A.df}` + (A.yates !== null ? ` • Yates: ${A.yates.toFixed(3)} (p = ${fmtP(chi2Sf(A.yates, 1))})` : ` • crit(α) = ${crit.toFixed(3)}`);
+            document.getElementById('kpiP').innerText = fmtP(A.pValue);
+            document.getElementById('kpiPSub').innerText = A.lowE > 0 ? `⚠ ${A.lowE} cell(s) with n̂ < 5 (min ${A.minE.toFixed(2)})` : `all n̂ij ≥ 5 (min ${A.minE.toFixed(2)})`;
+            document.getElementById('kpiPSub').style.color = A.lowE > 0 ? 'var(--accent-warn)' : '';
+            document.getElementById('kpiV').innerText = A.cramerV.toFixed(4);
+            document.getElementById('kpiVSub').innerText = `${strengthLabel(A.cramerV, Math.min(A.r - 1, A.c - 1))} association`;
+            const dec = document.getElementById('kpiDecision');
+            const reject = A.pValue < alpha;
+            dec.innerText = reject ? 'DEPENDENT' : 'NO EVIDENCE';
+            dec.className = 'kpi-value ' + (reject ? 'bad' : '');
+            document.getElementById('kpiDecisionSub').innerText = reject ? `reject H0 (p < ${alpha})` : `do not reject H0 (p ≥ ${alpha})`;
+        }
+
+        const TAB_INFO = {
+            obs: 'Joint absolute frequencies n_ij with marginal totals n_i· (last column) and n_·j (last row).',
+            rel: 'Joint relative frequencies f_ij = n_ij / n; the margins are the marginal relative frequencies f_i· and f_·j.',
+            condRow: 'Conditional distributions of Y given each category of X (row profiles f(j | i) = n_ij / n_i·). Under independence every row equals the marginal row at the bottom.',
+            condCol: 'Conditional distributions of X given each category of Y (column profiles f(i | j) = n_ij / n_·j). Under independence every column equals the marginal column on the right.',
+            exp: 'Expected frequencies under independence n̂_ij = n_i· · n_·j / n. Cells with n̂ < 5 are highlighted (Cochran\'s rule).',
+            resid: 'Each cell shows its contribution (n_ij − n̂_ij)² / n̂_ij to χ² and, in brackets, the Pearson residual (n_ij − n̂_ij)/√n̂_ij. Green = more observations than expected, red = fewer.'
+        };
+
+        function renderTable() {
+            const { ds, T, A } = STATE;
+            const tbl = document.getElementById('mainTable');
+            document.getElementById('tabCaption').innerText = TAB_INFO[activeTab];
+            const head = `<thead><tr><th>${escapeHtml(ds.xName)} \\ ${escapeHtml(ds.yName)}</th>${T.cols.map(c => `<th>${escapeHtml(c)}</th>`).join('')}<th>${activeTab === 'condRow' ? 'Total' : (activeTab === 'condCol' ? 'Marginal f<sub>i·</sub>' : 'Total')}</th></tr></thead>`;
+            let body = '';
+            const f4 = v => v.toFixed(4);
+            const pct = v => (100 * v).toFixed(2) + '%';
+            const maxAbsRes = Math.max(...A.resid.flat().map(Math.abs), 1e-9);
+
+            T.rows.forEach((rName, i) => {
+                let cells = '';
+                let tot = '';
+                T.cols.forEach((_, j) => {
+                    switch (activeTab) {
+                        case 'obs': cells += `<td>${T.O[i][j]}</td>`; break;
+                        case 'rel': cells += `<td>${f4(A.rel[i][j])}</td>`; break;
+                        case 'condRow': cells += `<td>${pct(A.condYX[i][j])}</td>`; break;
+                        case 'condCol': cells += `<td>${pct(A.condXY[i][j])}</td>`; break;
+                        case 'exp': cells += `<td class="${A.E[i][j] < 5 ? 'lowE' : ''}">${A.E[i][j].toFixed(2)}</td>`; break;
+                        case 'resid': {
+                            const res = A.resid[i][j], w = Math.min(1, Math.abs(res) / maxAbsRes);
+                            const bg = res >= 0 ? `rgba(50,184,114,${0.08 + 0.45 * w})` : `rgba(239,68,68,${0.08 + 0.45 * w})`;
+                            cells += `<td style="background:${bg}; color:#E2ECE7;">${A.contrib[i][j].toFixed(3)} <span style="opacity:0.75">(${res >= 0 ? '+' : ''}${res.toFixed(2)})</span></td>`;
+                            break;
+                        }
+                    }
+                });
+                switch (activeTab) {
+                    case 'obs': tot = T.rowTot[i]; break;
+                    case 'rel': tot = f4(A.relRow[i]); break;
+                    case 'condRow': tot = '100%'; break;
+                    case 'condCol': tot = pct(A.relRow[i]); break;
+                    case 'exp': tot = T.rowTot[i].toFixed(2); break;
+                    case 'resid': tot = sum(A.contrib[i]).toFixed(3); break;
+                }
+                body += `<tr><td>${escapeHtml(rName)}</td>${cells}<td class="total-col">${tot}</td></tr>`;
+            });
+
+            let lastLabel = 'Total', lastCells = '', grand = '';
+            switch (activeTab) {
+                case 'obs': lastCells = T.colTot.map(v => `<td>${v}</td>`).join(''); grand = T.n; break;
+                case 'rel': lastCells = A.relCol.map(v => `<td>${f4(v)}</td>`).join(''); grand = '1.0000'; break;
+                case 'condRow': lastLabel = 'Marginal f·j'; lastCells = A.relCol.map(v => `<td>${pct(v)}</td>`).join(''); grand = '100%'; break;
+                case 'condCol': lastCells = T.cols.map(() => '<td>100%</td>').join(''); grand = '100%'; break;
+                case 'exp': lastCells = T.colTot.map(v => `<td>${v.toFixed(2)}</td>`).join(''); grand = T.n.toFixed(2); break;
+                case 'resid': lastLabel = 'Column sum'; lastCells = T.cols.map((_, j) => `<td>${sum(A.contrib.map(r => r[j])).toFixed(3)}</td>`).join(''); grand = `χ² = ${A.chi2.toFixed(3)}`; break;
+            }
+            body += `<tr class="total-row"><td>${lastLabel}</td>${lastCells}<td class="total-col">${grand}</td></tr>`;
+            tbl.innerHTML = head + `<tbody>${body}</tbody>`;
+        }
+
+        function setupCanvas(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0e1611'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            return { canvas, ctx, W: canvas.width, H: canvas.height };
+        }
+
+        function drawMosaic() {
+            const { ds, T, A } = STATE;
+            const { ctx, W, H } = setupCanvas('canvasMosaic');
+            const padL = 40, padR = 15, padT = 18, padB = 46;
+            const plotW = W - padL - padR, plotH = H - padT - padB;
+            const gap = 4;
+            const usableW = plotW - gap * (A.r - 1);
+
+            // y axis ticks
+            ctx.fillStyle = '#8A9A92'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'right';
+            [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+                const y = padT + (1 - t) * plotH;
+                ctx.fillText((t * 100) + '%', padL - 6, y + 3);
+            });
+
+            let x = padL;
+            T.rows.forEach((rName, i) => {
+                const w = usableW * A.relRow[i];
+                let yBottom = padT + plotH;
+                T.cols.forEach((_, j) => {
+                    const h = plotH * A.condYX[i][j];
+                    ctx.fillStyle = PALETTE[j % PALETTE.length];
+                    ctx.globalAlpha = 0.78;
+                    ctx.fillRect(x, yBottom - h, w, h);
+                    ctx.globalAlpha = 1;
+                    ctx.strokeStyle = '#0e1611'; ctx.lineWidth = 1.5;
+                    ctx.strokeRect(x, yBottom - h, w, h);
+                    if (h > 14 && w > 34) {
+                        ctx.fillStyle = '#0e1611'; ctx.font = 'bold 10px JetBrains Mono'; ctx.textAlign = 'center';
+                        ctx.fillText((100 * A.condYX[i][j]).toFixed(1) + '%', x + w / 2, yBottom - h / 2 + 3);
+                    }
+                    yBottom -= h;
+                });
+                ctx.fillStyle = '#E2ECE7'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+                const label = String(rName).length > 12 ? String(rName).slice(0, 11) + '…' : String(rName);
+                if (w > 20) ctx.fillText(label, x + w / 2, padT + plotH + 14);
+                ctx.fillStyle = '#8A9A92';
+                if (w > 20) ctx.fillText(`n=${T.rowTot[i]}`, x + w / 2, padT + plotH + 27);
+                x += w + gap;
+            });
+
+            // marginal reference lines: cumulative f.j
+            ctx.setLineDash([5, 4]); ctx.strokeStyle = '#E2ECE7'; ctx.lineWidth = 1.2;
+            let cum = 0;
+            for (let j = 0; j < A.c - 1; j++) {
+                cum += A.relCol[j];
+                const y = padT + plotH * (1 - cum);
+                ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y); ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#8A9A92'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+            ctx.fillText(`${ds.xName} (column width ∝ marginal frequency)`, padL + plotW / 2, H - 6);
+
+            document.getElementById('mosaicLegend').innerHTML = T.cols.map((c, j) =>
+                `<span><i class="sw" style="background:${PALETTE[j % PALETTE.length]}"></i>${escapeHtml(ds.yName)} = ${escapeHtml(c)}</span>`).join('') +
+                '<span><i class="sw" style="background:transparent;border:1px dashed #E2ECE7"></i>marginal f·j (independence)</span>';
+        }
+
+        function drawChiDensity() {
+            const { A, crit } = STATE;
+            const { ctx, W, H } = setupCanvas('canvasChi');
+            const pad = { l: 46, r: 20, t: 26, b: 34 };
+            const plotW = W - pad.l - pad.r, plotH = H - pad.t - pad.b;
+            const df = A.df;
+            const naturalMax = Math.max(df + 6 * Math.sqrt(2 * df), crit * 1.35, 8);
+            const xMax = Math.max(naturalMax, Math.min(A.chi2 * 1.15, naturalMax * 3));
+            const steps = 400;
+            const xs = [], ys = [];
+            for (let s = 0; s <= steps; s++) {
+                const x = Math.max(1e-6, (s / steps) * xMax);
+                xs.push(x); ys.push(chi2Pdf(x, df));
+            }
+            const finite = ys.filter(isFinite);
+            let yMax = Math.max(...finite.slice(df <= 2 ? 8 : 0));
+            if (df === 1) yMax = Math.min(yMax, 1.2); else yMax *= 1.1;
+            const X = v => pad.l + (v / xMax) * plotW;
+            const Y = v => pad.t + plotH - (Math.min(v, yMax) / yMax) * plotH;
+
+            // axes
+            ctx.strokeStyle = 'rgba(138,154,146,0.3)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + plotH); ctx.lineTo(pad.l + plotW, pad.t + plotH); ctx.stroke();
+            ctx.fillStyle = '#8A9A92'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+            for (let t = 0; t <= 5; t++) {
+                const v = xMax * t / 5;
+                ctx.fillText(v.toFixed(v < 10 ? 1 : 0), X(v), pad.t + plotH + 14);
+            }
+            ctx.fillText('χ² value', pad.l + plotW / 2, H - 4);
+
+            // p-value tail
+            const obsClip = Math.min(A.chi2, xMax);
+            ctx.fillStyle = 'rgba(239,68,68,0.45)';
+            ctx.beginPath(); ctx.moveTo(X(obsClip), Y(0));
+            for (let s = 0; s <= steps; s++) if (xs[s] >= obsClip) ctx.lineTo(X(xs[s]), Y(ys[s]));
+            ctx.lineTo(X(xMax), Y(0)); ctx.closePath(); ctx.fill();
+
+            // density
+            ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2; ctx.beginPath();
+            let started = false;
+            for (let s = 0; s <= steps; s++) {
+                if (!isFinite(ys[s])) continue;
+                if (!started) { ctx.moveTo(X(xs[s]), Y(ys[s])); started = true; } else ctx.lineTo(X(xs[s]), Y(ys[s]));
+            }
+            ctx.stroke();
+
+            // critical value
+            if (crit <= xMax) {
+                ctx.setLineDash([2, 4]); ctx.strokeStyle = '#8A9A92'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(X(crit), pad.t); ctx.lineTo(X(crit), pad.t + plotH); ctx.stroke(); ctx.setLineDash([]);
+                ctx.fillStyle = '#8A9A92'; ctx.textAlign = 'left';
+                ctx.fillText(`crit = ${crit.toFixed(2)}`, X(crit) + 4, pad.t + 26);
+            }
+            // observed
+            ctx.strokeStyle = '#eab308'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+            ctx.beginPath(); ctx.moveTo(X(obsClip), pad.t); ctx.lineTo(X(obsClip), pad.t + plotH); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#eab308'; ctx.font = 'bold 10px JetBrains Mono';
+            const lbl = `χ²obs = ${A.chi2.toFixed(2)}${A.chi2 > xMax ? ' →' : ''}`;
+            ctx.textAlign = X(obsClip) > W - 140 ? 'right' : 'left';
+            ctx.fillText(lbl, X(obsClip) + (ctx.textAlign === 'right' ? -4 : 4), pad.t + 10);
+            ctx.fillStyle = '#E2ECE7'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'right';
+            ctx.fillText(`ν = ${df}   p = ${fmtP(A.pValue)}`, pad.l + plotW, pad.t - 10);
+        }
+
+        function renderVerdict() {
+            const { ds, T, A, alpha } = STATE;
+            const box = document.getElementById('verdictBox');
+            const reject = A.pValue < alpha;
+            const border = !reject && A.pValue < 0.10;
+            box.className = 'verdict ' + (reject ? 'dep' : (border ? 'border' : ''));
+            document.getElementById('verdictTitle').innerHTML = `<i class="fa-solid fa-gavel"></i> Interpretation — ${reject ? 'X and Y are statistically dependent' : 'no evidence against independence'}`;
+
+            // largest residual cell
+            let bi = 0, bj = 0;
+            A.resid.forEach((row, i) => row.forEach((v, j) => { if (Math.abs(v) > Math.abs(A.resid[bi][bj])) { bi = i; bj = j; } }));
+            const res = A.resid[bi][bj];
+            const share = A.contrib[bi][bj] / Math.max(A.chi2, 1e-12);
+            const kmin = Math.min(A.r - 1, A.c - 1);
+
+            // conditional comparison sentence for the most deviating Y category
+            const jStar = bj;
+            const profileTxt = T.rows.map((rn, i) => `${escapeHtml(rn)}: ${(100 * A.condYX[i][jStar]).toFixed(1)}%`).join(', ');
+
+            let html = `<p>With χ² = <strong>${A.chi2.toFixed(3)}</strong> on ν = ${A.df} degree${A.df > 1 ? 's' : ''} of freedom the p-value is <strong>${fmtP(A.pValue)}</strong>. `;
+            html += reject
+                ? `Since p &lt; α = ${alpha}, the hypothesis of independence is <strong>rejected</strong>: the observed table is too far from the product of its marginals to be explained by sampling variability alone.</p>`
+                : `Since p ≥ α = ${alpha}, independence is <strong>not rejected</strong>: the differences between the conditional distributions are compatible with chance${border ? ', although the result is borderline (p &lt; 0.10) and a larger sample could change the verdict' : ''}.</p>`;
+            html += `<p>The share of <strong>${escapeHtml(ds.yName)} = ${escapeHtml(T.cols[jStar])}</strong> conditional on ${escapeHtml(ds.xName)} is ${profileTxt}, against a marginal value of ${(100 * A.relCol[jStar]).toFixed(1)}%. `;
+            html += `The cell contributing most to χ² is (${escapeHtml(T.rows[bi])}, ${escapeHtml(T.cols[bj])}): ${T.O[bi][bj]} observed vs ${A.E[bi][bj].toFixed(1)} expected (residual ${res >= 0 ? '+' : ''}${res.toFixed(2)}, ${(100 * share).toFixed(1)}% of χ²). `;
+            html += `The largest gap between a conditional and the marginal frequency is ${(100 * A.maxDev).toFixed(1)} percentage points; Cramér's V = ${A.cramerV.toFixed(3)} indicates a <strong>${strengthLabel(A.cramerV, kmin)}</strong> association.</p>`;
+            if (A.lowE > 0) html += `<p class="warn-text">⚠ ${A.lowE} expected count(s) are below 5 (min ${A.minE.toFixed(2)}): the χ² approximation is questionable. Use the Monte Carlo p-value in Ex 3 or merge sparse categories.</p>`;
+            if (ds.truth) {
+                const ok = (ds.truth === 'dep') === reject;
+                html += `<p class="note">Ground truth of this synthetic dataset: <strong>${ds.truth === 'dep' ? 'dependent' : 'independent'}</strong>. The test ${ok ? 'reaches the correct conclusion' : (reject ? 'commits a <strong>type I error</strong> (false alarm, probability α)' : 'commits a <strong>type II error</strong> (dependence too weak or sample too small to detect)')} on this sample.</p>`;
+            }
+            document.getElementById('verdictBody').innerHTML = html;
+        }
+
+        // =====================================================================
+        // MONTE CARLO UNDER H0
+        // =====================================================================
+        function chi2OfTable(O) {
+            const rowTot = O.map(sum);
+            const colTot = O[0].map((_, j) => sum(O.map(r => r[j])));
+            const n = sum(rowTot);
+            let chi2 = 0;
+            for (let i = 0; i < O.length; i++) for (let j = 0; j < O[0].length; j++) {
+                const e = rowTot[i] * colTot[j] / n;
+                if (e > 0) chi2 += (O[i][j] - e) ** 2 / e;
+            }
+            return chi2;
+        }
+
+        let MC = null;
+        function runMonteCarlo() {
+            if (!STATE) return;
+            const { T, A, crit } = STATE;
+            const M = parseInt(document.getElementById('mcM').value, 10);
+            const seed = parseInt(document.getElementById('mcSeed').value, 10) || 1;
+            const rnd = mulberry32(seed);
+            const cumR = cumulative(T.rowTot), cumC = cumulative(T.colTot);
+            const sims = new Float64Array(M);
+            for (let m = 0; m < M; m++) {
+                const O = T.rows.map(() => T.cols.map(() => 0));
+                for (let k = 0; k < T.n; k++) O[sampleIndex(cumR, rnd())][sampleIndex(cumC, rnd())]++;
+                sims[m] = chi2OfTable(O);
+            }
+            const mean = sims.reduce((a, b) => a + b, 0) / M;
+            const variance = sims.reduce((a, b) => a + (b - mean) ** 2, 0) / (M - 1);
+            let above = 0, aboveCrit = 0;
+            for (const s of sims) { if (s >= A.chi2 - 1e-12) above++; if (s > crit) aboveCrit++; }
+            MC = { sims, mean, variance, pMC: (1 + above) / (M + 1), alphaEmp: aboveCrit / M, M };
+
+            document.getElementById('mcMean').innerText = mean.toFixed(3);
+            document.getElementById('mcMeanSub').innerText = `theory: E[χ²ν] = ν = ${A.df}`;
+            document.getElementById('mcVar').innerText = variance.toFixed(3);
+            document.getElementById('mcVarSub').innerText = `theory: Var[χ²ν] = 2ν = ${2 * A.df}`;
+            document.getElementById('mcAlpha').innerText = (100 * MC.alphaEmp).toFixed(2) + '%';
+            document.getElementById('mcAlphaSub').innerText = `nominal α = ${(100 * STATE.alpha).toFixed(0)}% • crit = ${crit.toFixed(3)}`;
+            document.getElementById('mcP').innerText = above === 0 ? `< ${(1 / (M + 1)).toExponential(1)}` : MC.pMC.toFixed(4);
+            document.getElementById('mcPSub').innerText = `asymptotic p = ${fmtP(A.pValue)} • ${above} of ${M} sims ≥ χ²obs`;
+            document.getElementById('mcChartSub').innerText = `M = ${M} datasets of n = ${T.n} drawn from p̂i· × p̂·j (ν = ${A.df})`;
+            drawMonteCarlo();
+        }
+
+        function drawMonteCarlo() {
+            const { A } = STATE;
+            const { ctx, W, H } = setupCanvas('canvasMC');
+            const pad = { l: 50, r: 24, t: 22, b: 34 };
+            const plotW = W - pad.l - pad.r, plotH = H - pad.t - pad.b;
+            const df = A.df;
+            const sorted = Array.from(MC.sims).sort((a, b) => a - b);
+            const q999 = sorted[Math.floor(0.995 * (sorted.length - 1))];
+            const xMax = Math.max(q999 * 1.1, df + 5 * Math.sqrt(2 * df), 6);
+            const nb = 50, bw = xMax / nb;
+            const counts = new Array(nb).fill(0);
+            for (const s of MC.sims) { const b = Math.floor(s / bw); if (b < nb) counts[b]++; }
+            const dens = counts.map(c => c / (MC.M * bw));
+            const pdf = [];
+            for (let s = 0; s <= 400; s++) { const x = Math.max(1e-6, xMax * s / 400); pdf.push([x, chi2Pdf(x, df)]); }
+            let yMax = Math.max(...dens, ...pdf.slice(df <= 2 ? 12 : 0).map(p => p[1]).filter(isFinite)) * 1.1;
+            if (df === 1) yMax = Math.min(yMax, Math.max(...dens) * 1.15);
+            const X = v => pad.l + (v / xMax) * plotW;
+            const Y = v => pad.t + plotH - (Math.min(v, yMax) / yMax) * plotH;
+
+            ctx.strokeStyle = 'rgba(138,154,146,0.3)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + plotH); ctx.lineTo(pad.l + plotW, pad.t + plotH); ctx.stroke();
+
+            dens.forEach((d, b) => {
+                ctx.fillStyle = 'rgba(50,184,114,0.4)'; ctx.strokeStyle = 'rgba(50,184,114,0.8)';
+                const x0 = X(b * bw), x1 = X((b + 1) * bw);
+                ctx.fillRect(x0, Y(d), x1 - x0 - 1, Y(0) - Y(d));
+            });
+            ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2; ctx.beginPath();
+            let started = false;
+            pdf.forEach(([x, y]) => { if (!isFinite(y)) return; if (!started) { ctx.moveTo(X(x), Y(y)); started = true; } else ctx.lineTo(X(x), Y(y)); });
+            ctx.stroke();
+
+            const obsX = Math.min(A.chi2, xMax);
+            ctx.strokeStyle = '#eab308'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+            ctx.beginPath(); ctx.moveTo(X(obsX), pad.t); ctx.lineTo(X(obsX), pad.t + plotH); ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle = '#eab308'; ctx.font = 'bold 10px JetBrains Mono';
+            ctx.textAlign = X(obsX) > W - 160 ? 'right' : 'left';
+            ctx.fillText(`χ²obs = ${A.chi2.toFixed(2)}${A.chi2 > xMax ? ' (off-scale →)' : ''}`, X(obsX) + (ctx.textAlign === 'right' ? -5 : 5), pad.t + 10);
+
+            ctx.fillStyle = '#8A9A92'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'center';
+            for (let t = 0; t <= 8; t++) { const v = xMax * t / 8; ctx.fillText(v.toFixed(v < 10 ? 1 : 0), X(v), pad.t + plotH + 14); }
+            ctx.fillText('simulated χ²* value', pad.l + plotW / 2, H - 4);
+        }
+
+        // =====================================================================
+        // EX 4: SUMMARY + STRATIFICATION
+        // =====================================================================
+        function renderEx4() {
+            const cases = [
+                { key: 'sexSmoke', label: '① Sex × Smoking', id: 'discSex' },
+                { key: 'ageSmoke', label: '② Age class × Smoking', id: 'discAge' },
+                { key: 'smokeFev', label: '③ Smoking × FEV class', id: 'discFev' }
+            ];
+            const res = {};
+            let html = '';
+            cases.forEach(cs => {
+                const ds = getDataset(cs.key);
+                const T = buildContingency(ds.xs, ds.ys, ds.rowOrder, ds.colOrder);
+                const A = analyse(T);
+                res[cs.key] = { T, A };
+                const rej = A.pValue < 0.05;
+                html += `<tr><td>${cs.label}</td><td>${A.r} × ${A.c}</td><td>${A.chi2.toFixed(3)}</td><td>${A.df}</td><td>${fmtP(A.pValue)}</td><td>${A.cramerV.toFixed(3)} (${strengthLabel(A.cramerV, Math.min(A.r - 1, A.c - 1))})</td>` +
+                    `<td style="color:${rej ? 'var(--accent-red)' : (A.pValue < 0.1 ? 'var(--accent-warn)' : 'var(--accent-cyan)')}; font-weight:600;">${rej ? 'Dependent (reject H₀)' : (A.pValue < 0.1 ? 'Borderline: do not reject H₀' : 'No evidence of dependence')}</td></tr>`;
+            });
+            document.getElementById('summaryBody').innerHTML = html;
+
+            const s = res.sexSmoke;
+            const fSm = s.A.condYX[0][1], mSm = s.A.condYX[1][1];
+            document.getElementById('discSex').innerHTML =
+                `Among girls ${(100 * fSm).toFixed(1)}% smoke, among boys ${(100 * mSm).toFixed(1)}% (marginal ${(100 * s.A.relCol[1]).toFixed(1)}%). ` +
+                `χ² = ${s.A.chi2.toFixed(3)} with 1 df gives p = ${fmtP(s.A.pValue)}, just above 0.05 (Yates-corrected p = ${fmtP(chi2Sf(s.A.yates, 1))}), and V = ${s.A.cramerV.toFixed(3)} is negligible-to-weak. At α = 0.05 we <strong>do not reject</strong> independence.`;
+
+            const a = res.ageSmoke;
+            document.getElementById('discAge').innerHTML =
+                `The smoking rate goes from ${(100 * a.A.condYX[0][1]).toFixed(1)}% (3–9) to ${(100 * a.A.condYX[1][1]).toFixed(1)}% (10–12) and ${(100 * a.A.condYX[2][1]).toFixed(1)}% (13–19). ` +
+                `χ² = ${a.A.chi2.toFixed(2)} with ${a.A.df} df gives p = ${fmtP(a.A.pValue)} and V = ${a.A.cramerV.toFixed(3)} (${strengthLabel(a.A.cramerV, 1)}).`;
+
+            const f = res.smokeFev;
+            document.getElementById('discFev').innerHTML =
+                `Smokers are concentrated in the <strong>high</strong> FEV tertile: ${(100 * f.A.condYX[1][2]).toFixed(1)}% of smokers vs ${(100 * f.A.condYX[0][2]).toFixed(1)}% of non-smokers, and only ${(100 * f.A.condYX[1][0]).toFixed(1)}% of smokers are in the low tertile. ` +
+                `χ² = ${f.A.chi2.toFixed(2)} (df ${f.A.df}), p = ${fmtP(f.A.pValue)}, V = ${f.A.cramerV.toFixed(3)}: a clear, statistically significant dependence.`;
+
+            // stratification table
+            const groups = ['3–9 yrs', '10–12 yrs', '13–15 yrs', '16–19 yrs'];
+            const stat = (arr) => arr.length ? { n: arr.length, m: sum(arr) / arr.length } : { n: 0, m: NaN };
+            const all = { non: stat(CHILD.filter(d => d.smoker === 'Non-smoker').map(d => d.fev)), sm: stat(CHILD.filter(d => d.smoker === 'Smoker').map(d => d.fev)) };
+            const ageMean = { non: sum(CHILD.filter(d => d.smoker === 'Non-smoker').map(d => d.age)) / all.non.n, sm: sum(CHILD.filter(d => d.smoker === 'Smoker').map(d => d.age)) / all.sm.n };
+            const rows = [{ g: 'All ages (pooled)', ...all }];
+            groups.forEach(g => rows.push({
+                g,
+                non: stat(CHILD.filter(d => d.smoker === 'Non-smoker' && ageClass4(d.age) === g).map(d => d.fev)),
+                sm: stat(CHILD.filter(d => d.smoker === 'Smoker' && ageClass4(d.age) === g).map(d => d.fev))
+            }));
+            let th = '<thead><tr><th>Age stratum</th><th>Non-smokers (n)</th><th>Mean FEV non-smokers</th><th>Smokers (n)</th><th>Mean FEV smokers</th><th>Difference (S − NS)</th></tr></thead><tbody>';
+            rows.forEach((r, idx) => {
+                const d = r.sm.m - r.non.m;
+                const lowN = r.sm.n < 5;
+                th += `<tr${idx === 0 ? ' class="total-row"' : ''}><td>${r.g}</td><td>${r.non.n}</td><td>${r.non.m.toFixed(3)} L</td><td>${r.sm.n}${lowN ? ' ⚠' : ''}</td><td>${r.sm.m.toFixed(3)} L</td>` +
+                    `<td style="color:${d >= 0 ? 'var(--accent-cyan)' : 'var(--accent-red)'}; font-weight:600;">${d >= 0 ? '+' : ''}${d.toFixed(3)} L</td></tr>`;
+            });
+            document.getElementById('strataTable').innerHTML = th + '</tbody>';
+            document.getElementById('strataNote').innerHTML =
+                `Pooled, smokers have a <strong>higher</strong> mean FEV (+${(all.sm.m - all.non.m).toFixed(3)} L), but they are also much older (mean age ${ageMean.sm.toFixed(1)} vs ${ageMean.non.toFixed(1)} years). ` +
+                `In the 13–15 and 16–19 strata, where smoking is common, the sign <strong>reverses</strong>: smokers have a lower FEV than non-smokers of the same age (${(rows[3].sm.m - rows[3].non.m).toFixed(3)} L and ${(rows[4].sm.m - rows[4].non.m).toFixed(3)} L). ` +
+                `In the 10–12 class the difference is small and positive, and the 3–9 class contains a single smoker (⚠), so no conclusion is possible there. ` +
+                `This is a Simpson-type reversal caused by the confounder age: the marginal association of Ex 2 ③ is real, but it is not the causal effect of smoking. Even the stratified comparison is observational, so it suggests rather than proves a harmful effect.`;
+            drawStrata(rows);
+        }
+
+        function drawStrata(rows) {
+            const { ctx, W, H } = setupCanvas('canvasStrata');
+            const pad = { l: 50, r: 20, t: 20, b: 40 };
+            const plotW = W - pad.l - pad.r, plotH = H - pad.t - pad.b;
+            const yMax = 4.5;
+            const Y = v => pad.t + plotH - (v / yMax) * plotH;
+            ctx.strokeStyle = 'rgba(138,154,146,0.15)'; ctx.fillStyle = '#8A9A92'; ctx.font = '10px JetBrains Mono'; ctx.textAlign = 'right';
+            for (let v = 0; v <= 4.5; v += 1) {
+                ctx.beginPath(); ctx.moveTo(pad.l, Y(v)); ctx.lineTo(pad.l + plotW, Y(v)); ctx.stroke();
+                ctx.fillText(v.toFixed(1) + ' L', pad.l - 6, Y(v) + 3);
+            }
+            const groupW = plotW / rows.length;
+            const barW = Math.min(60, groupW * 0.3);
+            rows.forEach((r, g) => {
+                const cx = pad.l + groupW * (g + 0.5);
+                [[r.non, '#3b82f6', -1], [r.sm, '#ef4444', 1]].forEach(([st, col, side]) => {
+                    if (!isFinite(st.m)) return;
+                    const x = cx + (side < 0 ? -barW - 3 : 3);
+                    ctx.fillStyle = col; ctx.globalAlpha = st.n < 5 ? 0.35 : 0.85;
+                    ctx.fillRect(x, Y(st.m), barW, Y(0) - Y(st.m));
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = '#E2ECE7'; ctx.textAlign = 'center'; ctx.font = '10px JetBrains Mono';
+                    ctx.fillText(st.m.toFixed(2), x + barW / 2, Y(st.m) - 5);
+                });
+                ctx.fillStyle = g === 0 ? '#eab308' : '#8A9A92'; ctx.textAlign = 'center';
+                ctx.fillText(r.g, cx, pad.t + plotH + 16);
+                ctx.fillText(`n = ${r.non.n} / ${r.sm.n}`, cx, pad.t + plotH + 30);
+                if (g === 0) {
+                    ctx.strokeStyle = 'rgba(138,154,146,0.35)'; ctx.setLineDash([3, 4]);
+                    ctx.beginPath(); ctx.moveTo(pad.l + groupW, pad.t); ctx.lineTo(pad.l + groupW, pad.t + plotH); ctx.stroke(); ctx.setLineDash([]);
+                }
+            });
+        }
+
+        // =====================================================================
+        // EVENTS
+        // =====================================================================
+        function updateControlsVisibility() {
+            const key = document.getElementById('datasetSelect').value;
+            document.getElementById('idsControls').classList.toggle('hidden', key !== 'ids');
+            document.getElementById('idsHelp').classList.toggle('hidden', key !== 'ids');
+            document.getElementById('customControls').classList.toggle('hidden', key !== 'custom');
+        }
+
+        document.getElementById('datasetSelect').addEventListener('change', () => {
+            updateControlsVisibility();
+            if (document.getElementById('datasetSelect').value === 'custom' && !customState.rows.length) parseCustomCsv();
+            runAnalysis();
+        });
+        document.getElementById('alphaSelect').addEventListener('change', runAnalysis);
+        document.getElementById('idsN').addEventListener('change', runAnalysis);
+        document.getElementById('idsSeed').addEventListener('change', runAnalysis);
+        document.getElementById('idsLambda').addEventListener('input', e => { document.getElementById('idsLambdaVal').innerText = (+e.target.value).toFixed(2); });
+        document.getElementById('idsLambda').addEventListener('change', runAnalysis);
+        document.getElementById('idsReseed').addEventListener('click', () => {
+            document.getElementById('idsSeed').value = Math.floor(Math.random() * 999999) + 1;
+            runAnalysis();
+        });
+        document.getElementById('customParse').addEventListener('click', () => { parseCustomCsv(); runAnalysis(); });
+        document.getElementById('customX').addEventListener('change', runAnalysis);
+        document.getElementById('customY').addEventListener('change', runAnalysis);
+        document.getElementById('customBins').addEventListener('change', runAnalysis);
+        document.getElementById('mcRun').addEventListener('click', runMonteCarlo);
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeTab = btn.dataset.tab;
+            if (STATE) renderTable();
+        }));
+
+        window.onload = () => {
+            updateControlsVisibility();
+            runAnalysis();
+            renderEx4();
+        };
+    </script>
+</body>
+</html>
